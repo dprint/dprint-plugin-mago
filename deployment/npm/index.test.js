@@ -5,8 +5,8 @@ const getBuffer = require("./index").getBuffer;
 
 const formatter = createFromBuffer(getBuffer());
 const result = formatter.formatText({
-  filePath: "file.js",
-  fileText: "console.log (   5 )",
+  filePath: "file.php",
+  fileText: "<?php\necho   5 ;",
 });
 
-assert.strictEqual(result, "console.log(5);\n");
+assert.strictEqual(result, "<?php\n\necho 5;\n");
