@@ -1,0 +1,14 @@
+~~ closureBraceStyle: next-line ~~
+== should put closure braces on next line ==
+<?php
+$fn = function () {
+    return 1;
+};
+
+[expect]
+<?php
+
+$fn = function ()
+{
+    return 1;
+};

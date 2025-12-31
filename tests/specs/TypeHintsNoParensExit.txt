@@ -1,0 +1,9 @@
+~~ parenthesesInExitAndDie: false ~~
+== should not add parentheses in exit ==
+<?php
+exit();
+
+[expect]
+<?php
+
+exit;

@@ -1,0 +1,26 @@
+~~ sortClassMethods: true ~~
+== should sort class methods ==
+<?php
+class Foo {
+    private function z() {}
+    public function a() {}
+    protected function m() {}
+}
+
+[expect]
+<?php
+
+class Foo
+{
+    public function a()
+    {
+    }
+
+    protected function m()
+    {
+    }
+
+    private function z()
+    {
+    }
+}

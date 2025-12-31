@@ -1,0 +1,9 @@
+~~ spaceBeforeArrowFunctionParameterListParenthesis: true ~~
+== should add space before arrow function parameter list ==
+<?php
+$fn = fn($x) => $x * 2;
+
+[expect]
+<?php
+
+$fn = fn ($x) => $x * 2;

@@ -1,0 +1,11 @@
+~~ spaceBeforeClosureUseClauseParenthesis: false ~~
+== should not add space before closure use clause ==
+<?php
+$fn = function ($x) use ($y) { return $x + $y; };
+
+[expect]
+<?php
+
+$fn = function ($x) use($y) {
+    return $x + $y;
+};

@@ -1,0 +1,68 @@
+== should inline empty closure braces (default) ==
+<?php
+$fn = function () {};
+
+[expect]
+<?php
+
+$fn = function () {};
+
+== should inline empty class braces (default) ==
+<?php
+class Foo {}
+
+[expect]
+<?php
+
+class Foo {}
+
+== should inline empty constructor braces (default) ==
+<?php
+class Foo {
+    public function __construct() {}
+}
+
+[expect]
+<?php
+
+class Foo
+{
+    public function __construct() {}
+}
+
+== should not inline empty method braces (default) ==
+<?php
+class Foo {
+    public function bar() {}
+}
+
+[expect]
+<?php
+
+class Foo
+{
+    public function bar()
+    {
+    }
+}
+
+== should not inline empty function braces (default) ==
+<?php
+function foo() {}
+
+[expect]
+<?php
+
+function foo()
+{
+}
+
+== should not inline empty control braces (default) ==
+<?php
+if (true) {}
+
+[expect]
+<?php
+
+if (true) {
+}

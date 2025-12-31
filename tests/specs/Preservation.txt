@@ -1,0 +1,14 @@
+== should preserve breaking array like (default) ==
+<?php
+$arr = [
+    'a',
+    'b',
+];
+
+[expect]
+<?php
+
+$arr = [
+    'a',
+    'b',
+];

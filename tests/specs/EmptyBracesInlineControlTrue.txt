@@ -1,0 +1,9 @@
+~~ inlineEmptyControlBraces: true ~~
+== should inline empty control braces ==
+<?php
+if (true) {}
+
+[expect]
+<?php
+
+if (true) {}

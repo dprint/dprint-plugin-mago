@@ -1,0 +1,14 @@
+~~ useTabs: true ~~
+== should use tabs when useTabs is true ==
+<?php
+function test() {
+    echo 'hello';
+}
+
+[expect]
+<?php
+
+function test()
+{
+	echo 'hello';
+}

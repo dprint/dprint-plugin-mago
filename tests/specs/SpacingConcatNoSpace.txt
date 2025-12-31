@@ -1,0 +1,9 @@
+~~ spaceAroundConcatenationBinaryOperator: false ~~
+== should not add space around concatenation operator ==
+<?php
+$x = 'hello' . 'world';
+
+[expect]
+<?php
+
+$x = 'hello'.'world';

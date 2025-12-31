@@ -1,0 +1,18 @@
+~~ methodBraceStyle: same-line ~~
+== should put method braces on same line ==
+<?php
+class Foo {
+    public function bar() {
+        return 1;
+    }
+}
+
+[expect]
+<?php
+
+class Foo
+{
+    public function bar() {
+        return 1;
+    }
+}

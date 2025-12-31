@@ -1,0 +1,14 @@
+~~ tabWidth: 2 ~~
+== should use custom tabWidth ==
+<?php
+function test() {
+    echo 'hello';
+}
+
+[expect]
+<?php
+
+function test()
+{
+  echo 'hello';
+}

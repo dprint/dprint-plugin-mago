@@ -1,0 +1,209 @@
+== should format basic echo ==
+<?php
+echo   'hello'  ;
+
+[expect]
+<?php
+
+echo 'hello';
+
+== should format class ==
+<?php
+class Foo{public function bar(){return 1;}}
+
+[expect]
+<?php
+
+class Foo
+{
+    public function bar()
+    {
+        return 1;
+    }
+}
+
+== should format function ==
+<?php
+function test($a,$b){return $a+$b;}
+
+[expect]
+<?php
+
+function test($a, $b)
+{
+    return $a + $b;
+}
+
+== should format if statement ==
+<?php
+if($a==1){echo 'one';}else{echo 'other';}
+
+[expect]
+<?php
+
+if ($a == 1) {
+    echo 'one';
+} else {
+    echo 'other';
+}
+
+== should format namespace and use ==
+<?php
+namespace App\Models;use Illuminate\Database\Eloquent\Model;class User extends Model{public function name(){return $this->name;}}
+
+[expect]
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+    public function name()
+    {
+        return $this->name;
+    }
+}
+
+== should format closure ==
+<?php
+$fn=function($x)use($y){return $x+$y;};
+
+[expect]
+<?php
+
+$fn = function ($x) use ($y) {
+    return $x + $y;
+};
+
+== should format arrow function ==
+<?php
+$fn=fn($x)=>$x*2;
+
+[expect]
+<?php
+
+$fn = fn($x) => $x * 2;
+
+== should format array ==
+<?php
+$arr=['a'=>1,'b'=>2];
+
+[expect]
+<?php
+
+$arr = ['a' => 1, 'b' => 2];
+
+== should format for loop ==
+<?php
+for($i=0;$i<10;$i++){echo $i;}
+
+[expect]
+<?php
+
+for ($i = 0; $i < 10; $i++) {
+    echo $i;
+}
+
+== should format foreach loop ==
+<?php
+foreach($items as $key=>$value){echo $value;}
+
+[expect]
+<?php
+
+foreach ($items as $key => $value) {
+    echo $value;
+}
+
+== should format while loop ==
+<?php
+while($x>0){$x--;}
+
+[expect]
+<?php
+
+while ($x > 0) {
+    $x--;
+}
+
+== should format switch statement ==
+<?php
+switch($x){case 1:echo 'one';break;default:echo 'other';}
+
+[expect]
+<?php
+
+switch ($x) {
+    case 1:
+        echo 'one';
+        break;
+    default:
+        echo 'other';
+}
+
+== should format try catch ==
+<?php
+try{doSomething();}catch(Exception $e){log($e);}finally{cleanup();}
+
+[expect]
+<?php
+
+try {
+    doSomething();
+} catch (Exception $e) {
+    log($e);
+} finally {
+    cleanup();
+}
+
+== should format interface ==
+<?php
+interface Foo{public function bar():string;}
+
+[expect]
+<?php
+
+interface Foo
+{
+    public function bar(): string;
+}
+
+== should format trait ==
+<?php
+trait Foo{public function bar(){return 'bar';}}
+
+[expect]
+<?php
+
+trait Foo
+{
+    public function bar()
+    {
+        return 'bar';
+    }
+}
+
+== should format enum ==
+<?php
+enum Status:string{case Active='active';case Inactive='inactive';}
+
+[expect]
+<?php
+
+enum Status: string
+{
+    case Active = 'active';
+    case Inactive = 'inactive';
+}
+
+== should format attribute ==
+<?php
+#[Route('/api')]class ApiController{}
+
+[expect]
+<?php
+
+#[Route('/api')]
+class ApiController {}

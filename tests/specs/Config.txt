@@ -1,0 +1,8 @@
+== should format with default config ==
+<?php
+echo 'hello';
+
+[expect]
+<?php
+
+echo 'hello';

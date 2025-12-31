@@ -1,0 +1,13 @@
+~~ printWidth: 60 ~~
+== should break method chain on next line (default) ==
+<?php
+$result = $builder->select('*')->from('users')->where('active', true)->get();
+
+[expect]
+<?php
+
+$result = $builder
+    ->select('*')
+    ->from('users')
+    ->where('active', true)
+    ->get();

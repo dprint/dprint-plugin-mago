@@ -1,0 +1,13 @@
+~~ functionBraceStyle: same-line ~~
+== should put function braces on same line ==
+<?php
+function test() {
+    return 1;
+}
+
+[expect]
+<?php
+
+function test() {
+    return 1;
+}

@@ -1,0 +1,11 @@
+~~ parenthesesInAttribute: true ~~
+== should add parentheses in attribute ==
+<?php
+#[Attribute]
+class Foo {}
+
+[expect]
+<?php
+
+#[Attribute()]
+class Foo {}

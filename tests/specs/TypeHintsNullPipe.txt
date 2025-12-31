@@ -1,0 +1,15 @@
+~~ nullTypeHint: null-pipe ~~
+== should use null pipe for nullable types ==
+<?php
+function test(?string $x): ?int
+{
+    return null;
+}
+
+[expect]
+<?php
+
+function test(null|string $x): null|int
+{
+    return null;
+}

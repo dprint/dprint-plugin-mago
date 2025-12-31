@@ -1,0 +1,13 @@
+~~ sortUses: false ~~
+== should not sort use statements ==
+<?php
+use C\Third;
+use A\First;
+use B\Second;
+
+[expect]
+<?php
+
+use C\Third;
+use A\First;
+use B\Second;

@@ -1,0 +1,16 @@
+~~ emptyLineAfterControlStructure: true ~~
+== should add empty line after control structure ==
+<?php
+if ($x) {
+    doSomething();
+}
+doOther();
+
+[expect]
+<?php
+
+if ($x) {
+    doSomething();
+}
+
+doOther();

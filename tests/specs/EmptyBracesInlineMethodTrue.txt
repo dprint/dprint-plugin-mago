@@ -1,0 +1,14 @@
+~~ inlineEmptyMethodBraces: true ~~
+== should inline empty method braces ==
+<?php
+class Foo {
+    public function bar() {}
+}
+
+[expect]
+<?php
+
+class Foo
+{
+    public function bar() {}
+}

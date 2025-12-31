@@ -1,0 +1,29 @@
+== should not use table style alignment for arrays (default) ==
+<?php
+$arr = [
+    'short' => 1,
+    'longerKey' => 2,
+    'x' => 3,
+];
+
+[expect]
+<?php
+
+$arr = [
+    'short' => 1,
+    'longerKey' => 2,
+    'x' => 3,
+];
+
+== should not align assignments (default) ==
+<?php
+$short = 1;
+$longerVariable = 2;
+$x = 3;
+
+[expect]
+<?php
+
+$short = 1;
+$longerVariable = 2;
+$x = 3;

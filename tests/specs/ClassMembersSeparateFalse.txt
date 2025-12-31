@@ -1,0 +1,24 @@
+~~ separateClassLikeMembers: false ~~
+== should not separate different class members ==
+<?php
+class Foo {
+    public const X = 1;
+
+    public $y;
+
+    public function bar() {}
+}
+
+[expect]
+<?php
+
+class Foo
+{
+    public const X = 1;
+
+    public $y;
+
+    public function bar()
+    {
+    }
+}

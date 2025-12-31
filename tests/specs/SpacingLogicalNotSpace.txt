@@ -1,0 +1,9 @@
+~~ spaceAfterLogicalNotUnaryPrefixOperator: true ~~
+== should add space after logical not ==
+<?php
+$x = !$y;
+
+[expect]
+<?php
+
+$x = ! $y;

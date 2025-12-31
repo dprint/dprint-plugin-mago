@@ -1,0 +1,47 @@
+== should separate different class members (default) ==
+<?php
+class Foo {
+    public const X = 1;
+    public $y;
+    public function bar() {}
+}
+
+[expect]
+<?php
+
+class Foo
+{
+    public const X = 1;
+
+    public $y;
+
+    public function bar()
+    {
+    }
+}
+
+== should not sort class methods (default) ==
+<?php
+class Foo {
+    public function z() {}
+    private function a() {}
+    protected function m() {}
+}
+
+[expect]
+<?php
+
+class Foo
+{
+    public function z()
+    {
+    }
+
+    private function a()
+    {
+    }
+
+    protected function m()
+    {
+    }
+}

@@ -1,0 +1,9 @@
+~~ spaceAfterCastUnaryPrefixOperators: false ~~
+== should not add space after cast operators ==
+<?php
+$x = (int) $y;
+
+[expect]
+<?php
+
+$x = (int)$y;

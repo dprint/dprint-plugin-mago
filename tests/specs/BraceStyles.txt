@@ -1,0 +1,72 @@
+== should put control braces on same line (default) ==
+<?php
+if ($a) {
+    echo 'yes';
+}
+
+[expect]
+<?php
+
+if ($a) {
+    echo 'yes';
+}
+
+== should put function braces on next line (default) ==
+<?php
+function test() {
+    return 1;
+}
+
+[expect]
+<?php
+
+function test()
+{
+    return 1;
+}
+
+== should put method braces on next line (default) ==
+<?php
+class Foo {
+    public function bar() {
+        return 1;
+    }
+}
+
+[expect]
+<?php
+
+class Foo
+{
+    public function bar()
+    {
+        return 1;
+    }
+}
+
+== should put class braces on next line (default) ==
+<?php
+class Foo {
+    public $x = 1;
+}
+
+[expect]
+<?php
+
+class Foo
+{
+    public $x = 1;
+}
+
+== should put closure braces on same line (default) ==
+<?php
+$fn = function () {
+    return 1;
+};
+
+[expect]
+<?php
+
+$fn = function () {
+    return 1;
+};

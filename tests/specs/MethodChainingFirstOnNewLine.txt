@@ -1,0 +1,12 @@
+~~ printWidth: 40 ~~
+== should put first method chain on new line (default) ==
+<?php
+$result = $builder->select('*')->from('users')->get();
+
+[expect]
+<?php
+
+$result = $builder
+    ->select('*')
+    ->from('users')
+    ->get();

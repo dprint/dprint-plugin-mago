@@ -1,0 +1,9 @@
+~~ singleQuote: false ~~
+== should use double quotes when singleQuote is false ==
+<?php
+$x = 'hello';
+
+[expect]
+<?php
+
+$x = "hello";

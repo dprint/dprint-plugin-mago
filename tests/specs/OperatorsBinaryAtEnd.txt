@@ -1,0 +1,12 @@
+~~ printWidth: 50, lineBeforeBinaryOperator: false ~~
+== should put binary operator at end of line when breaking ==
+<?php
+$result = $veryLongVariableName + $anotherVeryLongVariableName + $yetAnotherVariable;
+
+[expect]
+<?php
+
+$result =
+    $veryLongVariableName +
+    $anotherVeryLongVariableName +
+    $yetAnotherVariable;

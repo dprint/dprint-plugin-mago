@@ -1,0 +1,13 @@
+~~ emptyLineAfterNamespace: false ~~
+== should not add empty line after namespace ==
+<?php
+namespace App;
+
+class Foo {}
+
+[expect]
+<?php
+
+namespace App;
+
+class Foo {}

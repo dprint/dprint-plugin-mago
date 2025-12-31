@@ -1,0 +1,8 @@
+~~ emptyLineAfterOpeningTag: false ~~
+== should not add empty line after opening tag ==
+<?php
+echo 'hello';
+
+[expect]
+<?php
+echo 'hello';

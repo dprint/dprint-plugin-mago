@@ -1,0 +1,12 @@
+~~ preserveBreakingArrayLike: false ~~
+== should not preserve breaking array like ==
+<?php
+$arr = [
+    'a',
+    'b',
+];
+
+[expect]
+<?php
+
+$arr = ['a', 'b'];

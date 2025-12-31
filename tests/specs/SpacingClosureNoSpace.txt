@@ -1,0 +1,11 @@
+~~ spaceBeforeClosureParameterListParenthesis: false ~~
+== should not add space before closure parameter list ==
+<?php
+$fn = function ($x) { return $x; };
+
+[expect]
+<?php
+
+$fn = function($x) {
+    return $x;
+};

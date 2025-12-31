@@ -1,0 +1,15 @@
+~~ trailingComma: false ~~
+== should remove trailing comma when trailingComma is false ==
+<?php
+$arr = [
+    'a',
+    'b',
+];
+
+[expect]
+<?php
+
+$arr = [
+    'a',
+    'b'
+];

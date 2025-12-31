@@ -1,0 +1,11 @@
+~~ spaceAfterReferenceUnaryPrefixOperator: true ~~
+== should add space after reference operator ==
+<?php
+function test(&$x) {}
+
+[expect]
+<?php
+
+function test(&$x)
+{
+}

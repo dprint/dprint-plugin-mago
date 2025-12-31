@@ -1,0 +1,43 @@
+== should use question mark for nullable types (default) ==
+<?php
+function test(?string $x): ?int
+{
+    return null;
+}
+
+[expect]
+<?php
+
+function test(?string $x): ?int
+{
+    return null;
+}
+
+== should add parentheses in new expression (default) ==
+<?php
+$obj = new Foo;
+
+[expect]
+<?php
+
+$obj = new Foo();
+
+== should add parentheses in exit (default) ==
+<?php
+exit;
+
+[expect]
+<?php
+
+exit();
+
+== should not add parentheses in attribute (default) ==
+<?php
+#[Attribute]
+class Foo {}
+
+[expect]
+<?php
+
+#[Attribute]
+class Foo {}

@@ -1,0 +1,11 @@
+~~ inlineEmptyClasslikeBraces: false ~~
+== should not inline empty class braces ==
+<?php
+class Foo {}
+
+[expect]
+<?php
+
+class Foo
+{
+}

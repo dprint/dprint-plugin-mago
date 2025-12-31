@@ -1,0 +1,13 @@
+~~ classlikeBraceStyle: same-line ~~
+== should put class braces on same line ==
+<?php
+class Foo {
+    public $x = 1;
+}
+
+[expect]
+<?php
+
+class Foo {
+    public $x = 1;
+}

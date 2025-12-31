@@ -1,0 +1,16 @@
+~~ inlineEmptyConstructorBraces: false ~~
+== should not inline empty constructor braces ==
+<?php
+class Foo {
+    public function __construct() {}
+}
+
+[expect]
+<?php
+
+class Foo
+{
+    public function __construct()
+    {
+    }
+}

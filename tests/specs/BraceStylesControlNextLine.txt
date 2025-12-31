@@ -1,0 +1,14 @@
+~~ controlBraceStyle: next-line ~~
+== should put control braces on next line ==
+<?php
+if ($a) {
+    echo 'yes';
+}
+
+[expect]
+<?php
+
+if ($a)
+{
+    echo 'yes';
+}

@@ -1,0 +1,9 @@
+~~ inlineEmptyFunctionBraces: true ~~
+== should inline empty function braces ==
+<?php
+function foo() {}
+
+[expect]
+<?php
+
+function foo() {}

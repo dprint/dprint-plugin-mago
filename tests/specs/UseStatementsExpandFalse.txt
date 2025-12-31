@@ -1,0 +1,9 @@
+~~ expandUseGroups: false ~~
+== should not expand use groups ==
+<?php
+use App\Models\{User, Post, Comment};
+
+[expect]
+<?php
+
+use App\Models\{Comment, Post, User};

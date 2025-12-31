@@ -1,0 +1,38 @@
+== should sort use statements (default) ==
+<?php
+use C\Third;
+use A\First;
+use B\Second;
+
+[expect]
+<?php
+
+use A\First;
+use B\Second;
+use C\Third;
+
+== should separate use types (default) ==
+<?php
+use App\Models\User;
+use function App\Helpers\format;
+use const App\Constants\VERSION;
+
+[expect]
+<?php
+
+use App\Models\User;
+
+use function App\Helpers\format;
+
+use const App\Constants\VERSION;
+
+== should expand use groups (default) ==
+<?php
+use App\Models\{User, Post, Comment};
+
+[expect]
+<?php
+
+use App\Models\Comment;
+use App\Models\Post;
+use App\Models\User;

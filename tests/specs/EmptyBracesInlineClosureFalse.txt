@@ -1,0 +1,10 @@
+~~ inlineEmptyClosureBraces: false ~~
+== should not inline empty closure braces ==
+<?php
+$fn = function () {};
+
+[expect]
+<?php
+
+$fn = function () {
+};

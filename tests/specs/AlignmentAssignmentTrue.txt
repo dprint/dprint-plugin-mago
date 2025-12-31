@@ -1,0 +1,13 @@
+~~ alignAssignmentLike: true ~~
+== should align assignments ==
+<?php
+$short = 1;
+$longerVariable = 2;
+$x = 3;
+
+[expect]
+<?php
+
+$short          = 1;
+$longerVariable = 2;
+$x              = 3;

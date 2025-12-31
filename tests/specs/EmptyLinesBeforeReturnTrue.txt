@@ -1,0 +1,17 @@
+~~ emptyLineBeforeReturn: true ~~
+== should add empty line before return ==
+<?php
+function test() {
+    $x = 1;
+    return $x;
+}
+
+[expect]
+<?php
+
+function test()
+{
+    $x = 1;
+
+    return $x;
+}

@@ -1,0 +1,9 @@
+~~ parenthesesInNewExpression: false ~~
+== should not add parentheses in new expression ==
+<?php
+$obj = new Foo();
+
+[expect]
+<?php
+
+$obj = new Foo;

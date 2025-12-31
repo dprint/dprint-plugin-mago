@@ -1,0 +1,13 @@
+~~ separateUseTypes: false ~~
+== should not separate use types ==
+<?php
+use App\Models\User;
+use function App\Helpers\format;
+use const App\Constants\VERSION;
+
+[expect]
+<?php
+
+use App\Models\User;
+use function App\Helpers\format;
+use const App\Constants\VERSION;

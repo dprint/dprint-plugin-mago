@@ -1,0 +1,16 @@
+~~ emptyLineAfterUse: false ~~
+== should not add empty line after use statements ==
+<?php
+namespace App;
+
+use Other\Foo;
+
+class Bar {}
+
+[expect]
+<?php
+
+namespace App;
+
+use Other\Foo;
+class Bar {}

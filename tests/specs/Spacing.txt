@@ -1,0 +1,68 @@
+== should add space before closure parameter list (default) ==
+<?php
+$fn = function($x) { return $x; };
+
+[expect]
+<?php
+
+$fn = function ($x) {
+    return $x;
+};
+
+== should not add space before arrow function parameter list (default) ==
+<?php
+$fn = fn ($x) => $x * 2;
+
+[expect]
+<?php
+
+$fn = fn($x) => $x * 2;
+
+== should add space before closure use clause (default) ==
+<?php
+$fn = function($x)use($y) { return $x + $y; };
+
+[expect]
+<?php
+
+$fn = function ($x) use ($y) {
+    return $x + $y;
+};
+
+== should add space after cast operators (default) ==
+<?php
+$x = (int)$y;
+
+[expect]
+<?php
+
+$x = (int) $y;
+
+== should add space around concatenation operator (default) ==
+<?php
+$x = 'hello'.'world';
+
+[expect]
+<?php
+
+$x = 'hello' . 'world';
+
+== should not add space after logical not (default) ==
+<?php
+$x = ! $y;
+
+[expect]
+<?php
+
+$x = !$y;
+
+== should not add space after reference operator (default) ==
+<?php
+function test(& $x) {}
+
+[expect]
+<?php
+
+function test(&$x)
+{
+}

@@ -1,0 +1,414 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://plugins.dprint.dev/dprint/dprint-plugin-mago/0.0.0/schema.json",
+  "type": "object",
+  "definitions": {
+    "braceStyle": {
+      "description": "Brace placement style.",
+      "type": "string",
+      "oneOf": [{
+        "const": "same-line",
+        "description": "Opening brace on the same line."
+      }, {
+        "const": "next-line",
+        "description": "Opening brace on the next line."
+      }]
+    }
+  },
+  "properties": {
+    "phpVersionMajor": {
+      "description": "PHP major version for parsing.",
+      "default": 8,
+      "type": "number"
+    },
+    "phpVersionMinor": {
+      "description": "PHP minor version for parsing.",
+      "default": 4,
+      "type": "number"
+    },
+    "printWidth": {
+      "description": "Maximum line length before wrapping occurs.",
+      "default": 120,
+      "type": "number"
+    },
+    "tabWidth": {
+      "description": "Number of spaces per indentation level.",
+      "default": 4,
+      "type": "number"
+    },
+    "useTabs": {
+      "description": "Use tabs instead of spaces for indentation.",
+      "default": false,
+      "type": "boolean"
+    },
+    "endOfLine": {
+      "description": "End-of-line character sequence.",
+      "type": "string",
+      "default": "lf",
+      "oneOf": [{
+        "const": "lf",
+        "description": "Line feed."
+      }, {
+        "const": "crlf",
+        "description": "Carriage return, line feed."
+      }, {
+        "const": "cr",
+        "description": "Carriage return."
+      }]
+    },
+    "singleQuote": {
+      "description": "Prefer single quotes over double quotes.",
+      "default": true,
+      "type": "boolean"
+    },
+    "trailingComma": {
+      "description": "Add trailing comma to multi-line structures.",
+      "default": true,
+      "type": "boolean"
+    },
+    "removeTrailingCloseTag": {
+      "description": "Remove closing ?> tags from files.",
+      "default": true,
+      "type": "boolean"
+    },
+    "controlBraceStyle": {
+      "description": "Brace placement for control structures (if/for/while).",
+      "default": "same-line",
+      "$ref": "#/definitions/braceStyle"
+    },
+    "closureBraceStyle": {
+      "description": "Brace placement for closures.",
+      "default": "same-line",
+      "$ref": "#/definitions/braceStyle"
+    },
+    "functionBraceStyle": {
+      "description": "Brace placement for functions.",
+      "default": "next-line",
+      "$ref": "#/definitions/braceStyle"
+    },
+    "methodBraceStyle": {
+      "description": "Brace placement for methods.",
+      "default": "next-line",
+      "$ref": "#/definitions/braceStyle"
+    },
+    "classlikeBraceStyle": {
+      "description": "Brace placement for classes, interfaces, and traits.",
+      "default": "next-line",
+      "$ref": "#/definitions/braceStyle"
+    },
+    "inlineEmptyControlBraces": {
+      "description": "Place empty control structure bodies on same line.",
+      "default": false,
+      "type": "boolean"
+    },
+    "inlineEmptyClosureBraces": {
+      "description": "Place empty closure bodies on same line.",
+      "default": true,
+      "type": "boolean"
+    },
+    "inlineEmptyFunctionBraces": {
+      "description": "Place empty function bodies on same line.",
+      "default": false,
+      "type": "boolean"
+    },
+    "inlineEmptyMethodBraces": {
+      "description": "Place empty method bodies on same line.",
+      "default": false,
+      "type": "boolean"
+    },
+    "inlineEmptyConstructorBraces": {
+      "description": "Place empty constructor bodies on same line.",
+      "default": true,
+      "type": "boolean"
+    },
+    "inlineEmptyClasslikeBraces": {
+      "description": "Place empty class bodies on same line.",
+      "default": true,
+      "type": "boolean"
+    },
+    "inlineEmptyAnonymousClassBraces": {
+      "description": "Place empty anonymous class bodies on same line.",
+      "default": true,
+      "type": "boolean"
+    },
+    "methodChainBreakingStyle": {
+      "description": "How to break method chains across lines.",
+      "type": "string",
+      "default": "next-line",
+      "oneOf": [{
+        "const": "same-line",
+        "description": "Keep chained methods on the same line when possible."
+      }, {
+        "const": "next-line",
+        "description": "Break chained methods to new lines."
+      }]
+    },
+    "firstMethodChainOnNewLine": {
+      "description": "Place first method call on new line when chaining.",
+      "default": true,
+      "type": "boolean"
+    },
+    "preserveBreakingMemberAccessChain": {
+      "description": "Preserve existing line breaks in method chains.",
+      "default": false,
+      "type": "boolean"
+    },
+    "preserveBreakingArgumentList": {
+      "description": "Preserve existing line breaks in argument lists.",
+      "default": false,
+      "type": "boolean"
+    },
+    "preserveBreakingArrayLike": {
+      "description": "Preserve existing line breaks in array structures.",
+      "default": true,
+      "type": "boolean"
+    },
+    "preserveBreakingParameterList": {
+      "description": "Preserve existing line breaks in parameter lists.",
+      "default": false,
+      "type": "boolean"
+    },
+    "preserveBreakingAttributeList": {
+      "description": "Preserve existing line breaks in attribute lists.",
+      "default": false,
+      "type": "boolean"
+    },
+    "preserveBreakingConditionalExpression": {
+      "description": "Preserve existing line breaks in ternary expressions.",
+      "default": false,
+      "type": "boolean"
+    },
+    "breakPromotedPropertiesList": {
+      "description": "Always break parameter lists with promoted properties.",
+      "default": true,
+      "type": "boolean"
+    },
+    "lineBeforeBinaryOperator": {
+      "description": "Place binary operator on next line when breaking.",
+      "default": true,
+      "type": "boolean"
+    },
+    "alwaysBreakNamedArgumentsList": {
+      "description": "Always break named argument lists into multiple lines.",
+      "default": false,
+      "type": "boolean"
+    },
+    "alwaysBreakAttributeNamedArgumentLists": {
+      "description": "Always break named argument lists in attributes.",
+      "default": false,
+      "type": "boolean"
+    },
+    "arrayTableStyleAlignment": {
+      "description": "Use table-style alignment for arrays.",
+      "default": true,
+      "type": "boolean"
+    },
+    "alignAssignmentLike": {
+      "description": "Align consecutive assignment constructs in columns.",
+      "default": false,
+      "type": "boolean"
+    },
+    "sortUses": {
+      "description": "Sort use statements alphabetically.",
+      "default": true,
+      "type": "boolean"
+    },
+    "sortClassMethods": {
+      "description": "Sort class methods by visibility and type.",
+      "default": false,
+      "type": "boolean"
+    },
+    "separateUseTypes": {
+      "description": "Insert blank line between different use statement types.",
+      "default": true,
+      "type": "boolean"
+    },
+    "expandUseGroups": {
+      "description": "Expand grouped use statements individually.",
+      "default": true,
+      "type": "boolean"
+    },
+    "nullTypeHint": {
+      "description": "Format null type hints.",
+      "type": "string",
+      "default": "question",
+      "oneOf": [{
+        "const": "question",
+        "description": "Use question mark syntax (?Type)."
+      }, {
+        "const": "null-pipe",
+        "description": "Use null pipe syntax (Type|null)."
+      }]
+    },
+    "parenthesesAroundNewInMemberAccess": {
+      "description": "Add parentheses around new in member access.",
+      "default": false,
+      "type": "boolean"
+    },
+    "parenthesesInNewExpression": {
+      "description": "Add parentheses to new expressions without arguments.",
+      "default": true,
+      "type": "boolean"
+    },
+    "parenthesesInExitAndDie": {
+      "description": "Add parentheses to exit and die constructs.",
+      "default": true,
+      "type": "boolean"
+    },
+    "parenthesesInAttribute": {
+      "description": "Add parentheses to attributes without arguments.",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceBeforeArrowFunctionParameterListParenthesis": {
+      "description": "Add space before arrow function parameters.",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceBeforeClosureParameterListParenthesis": {
+      "description": "Add space before closure parameters.",
+      "default": true,
+      "type": "boolean"
+    },
+    "spaceBeforeHookParameterListParenthesis": {
+      "description": "Add space before hook parameters.",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceBeforeClosureUseClauseParenthesis": {
+      "description": "Add space before closure use parentheses.",
+      "default": true,
+      "type": "boolean"
+    },
+    "spaceAfterCastUnaryPrefixOperators": {
+      "description": "Add space after cast operators like (int).",
+      "default": true,
+      "type": "boolean"
+    },
+    "spaceAfterReferenceUnaryPrefixOperator": {
+      "description": "Add space after reference operator (&).",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceAfterErrorControlUnaryPrefixOperator": {
+      "description": "Add space after error control operator (@).",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceAfterLogicalNotUnaryPrefixOperator": {
+      "description": "Add space after logical not operator (!).",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceAfterBitwiseNotUnaryPrefixOperator": {
+      "description": "Add space after bitwise not operator (~).",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceAfterIncrementUnaryPrefixOperator": {
+      "description": "Add space after prefix increment operator (++).",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceAfterDecrementUnaryPrefixOperator": {
+      "description": "Add space after prefix decrement operator (--).",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceAfterAdditiveUnaryPrefixOperator": {
+      "description": "Add space after unary + and - operators.",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceAroundConcatenationBinaryOperator": {
+      "description": "Add spaces around concatenation operator (.).",
+      "default": true,
+      "type": "boolean"
+    },
+    "spaceAroundAssignmentInDeclare": {
+      "description": "Add spaces around = in declare statements.",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceWithinGroupingParenthesis": {
+      "description": "Add spaces inside grouping parentheses.",
+      "default": false,
+      "type": "boolean"
+    },
+    "emptyLineAfterControlStructure": {
+      "description": "Add empty line after control structures.",
+      "default": false,
+      "type": "boolean"
+    },
+    "emptyLineAfterOpeningTag": {
+      "description": "Add empty line after opening <?php tag.",
+      "default": true,
+      "type": "boolean"
+    },
+    "emptyLineAfterDeclare": {
+      "description": "Add empty line after declare statement.",
+      "default": true,
+      "type": "boolean"
+    },
+    "emptyLineAfterNamespace": {
+      "description": "Add empty line after namespace declaration.",
+      "default": true,
+      "type": "boolean"
+    },
+    "emptyLineAfterUse": {
+      "description": "Add empty line after use statement blocks.",
+      "default": true,
+      "type": "boolean"
+    },
+    "emptyLineAfterSymbols": {
+      "description": "Add empty line after top-level symbols.",
+      "default": true,
+      "type": "boolean"
+    },
+    "emptyLineBetweenSameSymbols": {
+      "description": "Add empty line between consecutive same-type symbols.",
+      "default": true,
+      "type": "boolean"
+    },
+    "emptyLineAfterClassLikeConstant": {
+      "description": "Add empty line after class constant.",
+      "default": false,
+      "type": "boolean"
+    },
+    "emptyLineAfterEnumCase": {
+      "description": "Add empty line after enum case.",
+      "default": false,
+      "type": "boolean"
+    },
+    "emptyLineAfterTraitUse": {
+      "description": "Add empty line after use statement in trait.",
+      "default": false,
+      "type": "boolean"
+    },
+    "emptyLineAfterProperty": {
+      "description": "Add empty line after property.",
+      "default": false,
+      "type": "boolean"
+    },
+    "emptyLineAfterMethod": {
+      "description": "Add empty line after method.",
+      "default": true,
+      "type": "boolean"
+    },
+    "emptyLineBeforeReturn": {
+      "description": "Add empty line before return statement.",
+      "default": false,
+      "type": "boolean"
+    },
+    "emptyLineBeforeDanglingComments": {
+      "description": "Add empty line before dangling comments.",
+      "default": true,
+      "type": "boolean"
+    },
+    "separateClassLikeMembers": {
+      "description": "Separate different kinds of class members with blank line.",
+      "default": true,
+      "type": "boolean"
+    }
+  }
+}
