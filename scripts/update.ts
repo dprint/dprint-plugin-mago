@@ -109,13 +109,9 @@ async function getLatestMagoVersions(): Promise<MagoVersions> {
 }
 
 async function updateRustToolchain(magoVersion: string) {
-  const response = await fetch(
+  const content = await $.request(
     `https://raw.githubusercontent.com/carthage-software/mago/${magoVersion}/Cargo.toml`,
-  );
-  if (!response.ok) {
-    throw new Error(`Failed to fetch mago Cargo.toml for version ${magoVersion}: ${response.statusText}`);
-  }
-  const content = await response.text();
+  ).text();
   const match = content.match(/rust-version\s*=\s*"([^"]+)"/);
   if (match == null) {
     throw new Error("Could not find rust-version in mago's Cargo.toml.");
@@ -136,11 +132,8 @@ async function updateRustToolchain(magoVersion: string) {
 }
 
 async function getLatestCrateVersion(crateName: string): Promise<string> {
-  const response = await fetch(`https://crates.io/api/v1/crates/${crateName}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${crateName} crate info: ${response.statusText}`);
-  }
-  const data = await response.json();
+  const data = await $.request(`https://crates.io/api/v1/crates/${crateName}`)
+    .json<{ crate?: { newest_version?: string } }>();
   const latestVersion = data.crate?.newest_version;
   if (latestVersion == null) {
     throw new Error(`Could not find latest version of ${crateName} on crates.io.`);
