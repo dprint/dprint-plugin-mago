@@ -27,6 +27,9 @@ if (hasPhpVersionUpdate) {
   $.log(`  mago-php-version: ${currentVersions.phpVersion} -> ${latestVersions.phpVersion}`);
 }
 
+$.logStep("Updating rust-toolchain.toml...");
+await updateRustToolchain(latestVersions.formatter);
+
 $.logStep("Updating Cargo.toml...");
 const isPatchBump = hasFormatterUpdate
   ? semver.parse(currentVersions.formatter).major === semver.parse(latestVersions.formatter).major
@@ -105,12 +108,32 @@ async function getLatestMagoVersions(): Promise<MagoVersions> {
   return { formatter, phpVersion };
 }
 
-async function getLatestCrateVersion(crateName: string): Promise<string> {
-  const response = await fetch(`https://crates.io/api/v1/crates/${crateName}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${crateName} crate info: ${response.statusText}`);
+async function updateRustToolchain(magoVersion: string) {
+  const content = await $.request(
+    `https://raw.githubusercontent.com/carthage-software/mago/${magoVersion}/Cargo.toml`,
+  ).text();
+  const match = content.match(/rust-version\s*=\s*"([^"]+)"/);
+  if (match == null) {
+    throw new Error("Could not find rust-version in mago's Cargo.toml.");
   }
-  const data = await response.json();
+  const magoRustVersion = match[1];
+  const toolchainPath = rootDirPath.join("rust-toolchain.toml");
+  const localContent = toolchainPath.readTextSync();
+  const localMatch = localContent.match(/channel\s*=\s*"([^"]+)"/);
+  if (localMatch == null) {
+    throw new Error("Could not find channel in local rust-toolchain.toml.");
+  }
+  if (localMatch[1] !== magoRustVersion) {
+    $.log(`Updating Rust toolchain: ${localMatch[1]} -> ${magoRustVersion}`);
+    toolchainPath.writeTextSync(localContent.replace(localMatch[0], `channel = "${magoRustVersion}"`));
+  } else {
+    $.log(`Rust toolchain already at ${magoRustVersion}.`);
+  }
+}
+
+async function getLatestCrateVersion(crateName: string): Promise<string> {
+  const data = await $.request(`https://crates.io/api/v1/crates/${crateName}`)
+    .json<{ crate?: { newest_version?: string } }>();
   const latestVersion = data.crate?.newest_version;
   if (latestVersion == null) {
     throw new Error(`Could not find latest version of ${crateName} on crates.io.`);
