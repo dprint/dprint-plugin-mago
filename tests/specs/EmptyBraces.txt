@@ -30,7 +30,7 @@ class Foo
     public function __construct() {}
 }
 
-== should not inline empty method braces (default) ==
+== should inline empty method braces (default) ==
 <?php
 class Foo {
     public function bar() {}
@@ -41,21 +41,17 @@ class Foo {
 
 class Foo
 {
-    public function bar()
-    {
-    }
+    public function bar() {}
 }
 
-== should not inline empty function braces (default) ==
+== should inline empty function braces (default) ==
 <?php
 function foo() {}
 
 [expect]
 <?php
 
-function foo()
-{
-}
+function foo() {}
 
 == should not inline empty control braces (default) ==
 <?php
