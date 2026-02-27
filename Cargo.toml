@@ -27,8 +27,8 @@ wasm = ["serde_json", "dprint-core/wasm"]
 anyhow = "1.0.51"
 bumpalo = "3"
 dprint-core = { version = "0.67.4", default-features = false }
-mago-formatter = "1.12.1"
-mago-php-version = "1.12.1"
+mago-formatter = "1.13.1"
+mago-php-version = "1.13.1"
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = { version = "1.0", optional = true }
 
