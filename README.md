@@ -11,7 +11,9 @@ Adapter for [Mago](https://github.com/carthage-software/mago) for use as a forma
 Then in your project's directory with a dprint.json file, run:
 
 ```shellsession
-dprint config add mago
+dprint add mago
+# or install from npm
+dprint add npm:@dprint/mago
 ```
 
 Note: You do not need Mago installed globally as dprint will run Mago from the .wasm file in a sandboxed environment.
