@@ -15,9 +15,7 @@ class Foo
 
     public $y;
 
-    public function bar()
-    {
-    }
+    public function bar() {}
 }
 
 == should not sort class methods (default) ==
@@ -33,15 +31,9 @@ class Foo {
 
 class Foo
 {
-    public function z()
-    {
-    }
+    public function z() {}
 
-    private function a()
-    {
-    }
+    private function a() {}
 
-    protected function m()
-    {
-    }
+    protected function m() {}
 }

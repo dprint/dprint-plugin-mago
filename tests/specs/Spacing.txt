@@ -63,6 +63,4 @@ function test(& $x) {}
 [expect]
 <?php
 
-function test(&$x)
-{
-}
+function test(&$x) {}

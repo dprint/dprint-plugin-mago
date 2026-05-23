@@ -12,15 +12,9 @@ class Foo {
 
 class Foo
 {
-    public function a()
-    {
-    }
+    public function a() {}
 
-    protected function m()
-    {
-    }
+    protected function m() {}
 
-    private function z()
-    {
-    }
+    private function z() {}
 }
