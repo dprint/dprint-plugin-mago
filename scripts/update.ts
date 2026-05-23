@@ -27,6 +27,9 @@ if (hasPhpVersionUpdate) {
   $.log(`  mago-php-version: ${currentVersions.phpVersion} -> ${latestVersions.phpVersion}`);
 }
 
+$.logStep("Updating rust-toolchain.toml...");
+await updateRustToolchain(latestVersions.formatter);
+
 $.logStep("Updating Cargo.toml...");
 const isPatchBump = hasFormatterUpdate
   ? semver.parse(currentVersions.formatter).major === semver.parse(latestVersions.formatter).major
@@ -117,4 +120,33 @@ async function getLatestCrateVersion(crateName: string): Promise<string> {
   }
   $.logLight(`Latest ${crateName} version on crates.io:`, latestVersion);
   return latestVersion;
+}
+
+async function updateRustToolchain(formatterVersion: string) {
+  const response = await fetch(`https://crates.io/api/v1/crates/mago-formatter/${formatterVersion}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch mago-formatter ${formatterVersion} info: ${response.statusText}`);
+  }
+  const data = await response.json();
+  const requiredRustVersion = data.version?.rust_version;
+  if (requiredRustVersion == null) {
+    $.log(`mago-formatter ${formatterVersion} does not declare a rust_version; leaving rust-toolchain.toml alone.`);
+    return;
+  }
+
+  const toolchainPath = rootDirPath.join("rust-toolchain.toml");
+  const localContent = toolchainPath.readTextSync();
+  const localMatch = localContent.match(/channel\s*=\s*"([^"]+)"/);
+  if (localMatch == null) {
+    throw new Error("Could not find channel in local rust-toolchain.toml.");
+  }
+  // only bump up; never downgrade. compare as semver so 1.95.0 > 1.92.0.
+  const local = semver.parse(localMatch[1]);
+  const required = semver.parse(requiredRustVersion);
+  if (semver.greaterThan(required, local)) {
+    $.log(`Updating Rust toolchain: ${localMatch[1]} -> ${requiredRustVersion}`);
+    toolchainPath.writeTextSync(localContent.replace(localMatch[0], `channel = "${requiredRustVersion}"`));
+  } else {
+    $.log(`Rust toolchain at ${localMatch[1]} already satisfies mago-formatter ${formatterVersion} (needs >= ${requiredRustVersion}).`);
+  }
 }
