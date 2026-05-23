@@ -140,9 +140,12 @@ async function updateRustToolchain(formatterVersion: string) {
   if (localMatch == null) {
     throw new Error("Could not find channel in local rust-toolchain.toml.");
   }
+  // crates.io rust_version may be "1.84" (no patch); pad to MAJOR.MINOR.PATCH
+  // so @std/semver can parse it.
+  const normalize = (v: string) => /^\d+\.\d+$/.test(v) ? `${v}.0` : v;
   // only bump up; never downgrade. compare as semver so 1.95.0 > 1.92.0.
-  const local = semver.parse(localMatch[1]);
-  const required = semver.parse(requiredRustVersion);
+  const local = semver.parse(normalize(localMatch[1]));
+  const required = semver.parse(normalize(requiredRustVersion));
   if (semver.greaterThan(required, local)) {
     $.log(`Updating Rust toolchain: ${localMatch[1]} -> ${requiredRustVersion}`);
     toolchainPath.writeTextSync(localContent.replace(localMatch[0], `channel = "${requiredRustVersion}"`));
