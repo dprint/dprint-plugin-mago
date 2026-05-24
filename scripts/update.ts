@@ -108,40 +108,36 @@ async function getLatestMagoVersions(): Promise<MagoVersions> {
   return { formatter, phpVersion };
 }
 
-async function getLatestCrateVersion(crateName: string): Promise<string> {
-  const data = await $.request(`https://crates.io/api/v1/crates/${crateName}`).json();
-  const latestVersion = data.crate?.newest_version;
-  if (latestVersion == null) {
-    throw new Error(`Could not find latest version of ${crateName} on crates.io.`);
+async function updateRustToolchain(magoVersion: string) {
+  const content = await $.request(
+    `https://raw.githubusercontent.com/carthage-software/mago/${magoVersion}/Cargo.toml`,
+  ).text();
+  const match = content.match(/rust-version\s*=\s*"([^"]+)"/);
+  if (match == null) {
+    throw new Error("Could not find rust-version in mago's Cargo.toml.");
   }
-  $.logLight(`Latest ${crateName} version on crates.io:`, latestVersion);
-  return latestVersion;
-}
-
-async function updateRustToolchain(formatterVersion: string) {
-  const data = await $.request(`https://crates.io/api/v1/crates/mago-formatter/${formatterVersion}`).json();
-  const requiredRustVersion = data.version?.rust_version;
-  if (requiredRustVersion == null) {
-    $.log(`mago-formatter ${formatterVersion} does not declare a rust_version; leaving rust-toolchain.toml alone.`);
-    return;
-  }
-
+  const magoRustVersion = match[1];
   const toolchainPath = rootDirPath.join("rust-toolchain.toml");
   const localContent = toolchainPath.readTextSync();
   const localMatch = localContent.match(/channel\s*=\s*"([^"]+)"/);
   if (localMatch == null) {
     throw new Error("Could not find channel in local rust-toolchain.toml.");
   }
-  // crates.io rust_version may be "1.84" (no patch); pad to MAJOR.MINOR.PATCH
-  // so @std/semver can parse it.
-  const normalize = (v: string) => /^\d+\.\d+$/.test(v) ? `${v}.0` : v;
-  // only bump up; never downgrade. compare as semver so 1.95.0 > 1.92.0.
-  const local = semver.parse(normalize(localMatch[1]));
-  const required = semver.parse(normalize(requiredRustVersion));
-  if (semver.greaterThan(required, local)) {
-    $.log(`Updating Rust toolchain: ${localMatch[1]} -> ${requiredRustVersion}`);
-    toolchainPath.writeTextSync(localContent.replace(localMatch[0], `channel = "${requiredRustVersion}"`));
+  if (localMatch[1] !== magoRustVersion) {
+    $.log(`Updating Rust toolchain: ${localMatch[1]} -> ${magoRustVersion}`);
+    toolchainPath.writeTextSync(localContent.replace(localMatch[0], `channel = "${magoRustVersion}"`));
   } else {
-    $.log(`Rust toolchain at ${localMatch[1]} already satisfies mago-formatter ${formatterVersion} (needs >= ${requiredRustVersion}).`);
+    $.log(`Rust toolchain already at ${magoRustVersion}.`);
   }
+}
+
+async function getLatestCrateVersion(crateName: string): Promise<string> {
+  const data = await $.request(`https://crates.io/api/v1/crates/${crateName}`)
+    .json<{ crate?: { newest_version?: string } }>();
+  const latestVersion = data.crate?.newest_version;
+  if (latestVersion == null) {
+    throw new Error(`Could not find latest version of ${crateName} on crates.io.`);
+  }
+  $.logLight(`Latest ${crateName} version on crates.io:`, latestVersion);
+  return latestVersion;
 }
