@@ -33,8 +33,12 @@ pub fn format_text(file_path: &Path, input_text: &str, config: &Configuration) -
   let settings = build_format_settings(config);
   let formatter = Formatter::new(&arena, php_version, settings);
 
-  let file_name = file_path.to_string_lossy().into_owned();
-  let formatted = formatter.format_code(Cow::Owned(file_name), Cow::Owned(input_text.to_string()))?;
+  // mago_formatter::Formatter::format_code requires Cow<'static, [u8]>,
+  // so the runtime inputs are converted to owned Vec<u8>.
+  let file_name = file_path.to_string_lossy().into_owned().into_bytes();
+  let code = input_text.as_bytes().to_vec();
+  let formatted = formatter.format_code(Cow::Owned(file_name), Cow::Owned(code))?;
+  let formatted = std::str::from_utf8(formatted)?;
 
   if formatted == input_text {
     Ok(None)
