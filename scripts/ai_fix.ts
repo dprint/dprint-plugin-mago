@@ -30,6 +30,8 @@ export interface AiFixOptions {
   toVersion: string;
   /** Whether the checks (test + clippy) already passed with the bump applied. */
   checksPassed: boolean;
+  /** Combined output of the failing checks (empty when `checksPassed`). */
+  checkOutput: string;
 }
 
 /** Max number of times the reviewer may send changes back to Codex. */
@@ -77,7 +79,7 @@ async function runCodex(prompt: string): Promise<void> {
 }
 
 function buildFixPrompt(options: AiFixOptions): string {
-  const { isPatchBump, fromVersion, toVersion, checksPassed } = options;
+  const { isPatchBump, fromVersion, toVersion, checksPassed, checkOutput } = options;
 
   const situation = checksPassed
     ? `Mago was upgraded from ${fromVersion} to ${toVersion} (a ${
@@ -85,10 +87,21 @@ function buildFixPrompt(options: AiFixOptions): string {
     } bump). The project already compiles and the checks pass, but a new Mago version may have ADDED, RENAMED, or REMOVED formatting settings that should be surfaced by this plugin.`
     : `Mago was upgraded from ${fromVersion} to ${toVersion} and the checks fail (the project no longer builds, or \`cargo test\` or \`cargo clippy\` fails). This is almost always because Mago's public API (usually its \`FormatSettings\` struct or related enums) changed.`;
 
+  const failureOutput = checkOutput.trim().length > 0
+    ? [
+      ``,
+      `The checks currently fail with the output below. Use it as your starting point instead of re-running the checks just to rediscover the errors:`,
+      "```",
+      truncateHead(checkOutput.trim()),
+      "```",
+    ]
+    : [];
+
   return [
     `You are updating the "dprint-plugin-mago" Rust crate, a dprint plugin that wraps the \`mago-formatter\` crate to format PHP.`,
     ``,
     situation,
+    ...failureOutput,
     ``,
     `Your goal: make the checks pass AND keep this plugin's configuration surface in sync with mago-formatter's \`FormatSettings\`. Do NOT commit or push; only edit files in the working tree.`,
     ``,
@@ -131,6 +144,12 @@ function describeWiring(): string {
     `- \`deployment/schema.json\` -> the JSON schema of config options shown to users.`,
     `- \`README.md\` -> documents each config option.`,
   ].join("\n");
+}
+
+// keep the tail of long check output -- the errors and the "could not compile"
+// summary are at the end, which is the most useful part for the AI.
+function truncateHead(text: string, max = 20_000): string {
+  return text.length > max ? `... (truncated)\n${text.slice(text.length - max)}` : text;
 }
 
 // stage 2: independent reviewer ------------------------------------------------

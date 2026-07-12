@@ -56,10 +56,10 @@ if (hasPhpVersionUpdate) {
 // bump always gets an AI review (Mago may have added settings without breaking
 // the build), and a patch bump that fails the checks gets an AI fix attempt.
 $.logStep("Running checks (test + clippy)...");
-const checksPassed = await runChecks();
+const checks = await runChecks();
 
-if (!isPatchBump || !checksPassed) {
-  if (checksPassed) {
+if (!isPatchBump || !checks.passed) {
+  if (checks.passed) {
     $.logStep("Minor Mago update — running AI review for new/changed settings...");
   } else {
     $.logStep("Patch update failed the checks — running AI fix...");
@@ -68,7 +68,10 @@ if (!isPatchBump || !checksPassed) {
     isPatchBump,
     fromVersion: currentVersions.formatter,
     toVersion: latestVersions.formatter,
-    checksPassed,
+    checksPassed: checks.passed,
+    // hand the failing output to the AI so it can go straight to fixing
+    // instead of re-running the checks just to rediscover the errors.
+    checkOutput: checks.output,
   });
 
   // the AI must leave the project in a passing state, otherwise fail the
@@ -100,11 +103,24 @@ await $`git push origin ${newVersion}`;
 
 // the checks that must pass before publishing. clippy is included because CI
 // (and Codex) run it with warnings denied, so a clippy failure is as breaking
-// as a test failure.
-async function runChecks(): Promise<boolean> {
-  const test = await $`cargo test`.noThrow();
-  const clippy = await $`cargo clippy --all-targets --all-features -- -D warnings`.noThrow();
-  return test.code === 0 && clippy.code === 0;
+// as a test failure. `inheritPiped` + `captureCombined` streams the output to
+// the CI log live while also capturing it so a failure can be handed to the AI.
+async function runChecks(): Promise<{ passed: boolean; output: string }> {
+  const test = await capture($`cargo test`);
+  const clippy = await capture($`cargo clippy --all-targets --all-features -- -D warnings`);
+  const failures = [test, clippy].filter((r) => r.code !== 0);
+  return {
+    passed: failures.length === 0,
+    output: failures.map((r) => r.combined).join("\n\n"),
+  };
+}
+
+function capture(command: ReturnType<typeof $>) {
+  return command
+    .stdout("inheritPiped")
+    .stderr("inheritPiped")
+    .captureCombined()
+    .noThrow();
 }
 
 // same checks as `runChecks`, but throws on the first failure so the workflow
