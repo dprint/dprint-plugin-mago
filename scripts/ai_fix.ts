@@ -1,12 +1,15 @@
 /**
- * Reconciles this plugin with a new Mago release using OpenAI, in two stages:
+ * Reconciles this plugin with a new Mago release using OpenAI Codex, in two
+ * stages that each run Codex with a different model:
  *
  *   1. a Codex agentic session edits the source and runs `cargo test` until
  *      green (fixing breakage and/or wiring up new `FormatSettings`), then
- *   2. a SEPARATE reviewer model independently reviews the resulting diff.
- *      If it finds blocking issues they are fed back to Codex for another
- *      pass, bounded by `REVIEW_MAX_ROUNDS`. If it still isn't approved, this
- *      throws so the workflow fails and nothing is published.
+ *   2. a SEPARATE reviewer model reviews the result in a read-only Codex
+ *      sandbox, so it can investigate (read the upstream mago-formatter source,
+ *      grep the repo) but cannot modify anything. If it finds blocking issues
+ *      they are fed back to the stage-1 Codex for another pass, bounded by
+ *      `REVIEW_MAX_ROUNDS`. If it still isn't approved, this throws so the
+ *      workflow fails and nothing is published.
  *
  * Two situations call this:
  *   - a patch bump that failed to build/test (fix the breakage), and
@@ -141,89 +144,81 @@ interface ReviewIssue {
   description: string;
 }
 
+// The reviewer runs Codex too, but in a READ-ONLY sandbox so it can actually
+// investigate (read the mago-formatter source cargo downloaded, grep the repo,
+// verify field names against the real upstream API) without being able to
+// modify anything. Its verdict is captured as JSON via --output-last-message.
 async function reviewChanges(options: AiFixOptions): Promise<ReviewResult> {
-  const diff = await getWorkingTreeDiff();
-  // default to a different, general-purpose model than the Codex fixer so the
-  // review is a genuinely independent second opinion.
-  const model = Deno.env.get("REVIEW_MODEL") ?? "gpt-5";
+  // default to a different model than the Codex fixer so the review is a
+  // genuinely independent second opinion.
+  const model = Deno.env.get("REVIEW_MODEL") ?? "gpt-5.6-sol";
 
-  $.logStep(`Reviewing changes with ${model}...`);
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  // record intent-to-add so any files Codex created also show in `git diff`.
+  await $`git add -N .`.quiet();
+
+  const outputFile = await Deno.makeTempFile({ prefix: "codex-review-", suffix: ".json" });
+  try {
+    $.logStep(`Reviewing changes with Codex (${model}, read-only)...`);
+    const args = [
+      "exec",
+      "--skip-git-repo-check",
+      "--sandbox",
+      "read-only",
+      "--model",
       model,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a meticulous Rust code reviewer for dprint-plugin-mago, a dprint plugin wrapping the mago-formatter crate to format PHP. You review a diff produced by another AI that reconciled the plugin with a new Mago release. Approve only if the changes are correct and complete; flag anything wrong as a blocking issue.",
-        },
-        { role: "user", content: buildReviewPrompt(options, diff) },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "review",
-          strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              approved: { type: "boolean" },
-              summary: { type: "string" },
-              issues: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    severity: { type: "string", enum: ["blocking", "nit"] },
-                    description: { type: "string" },
-                  },
-                  required: ["severity", "description"],
-                  additionalProperties: false,
-                },
-              },
-            },
-            required: ["approved", "summary", "issues"],
-            additionalProperties: false,
-          },
-        },
-      },
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`OpenAI review request failed: ${res.status} ${await res.text()}`);
+      "--output-last-message",
+      outputFile,
+      buildReviewPrompt(options),
+    ];
+    await $`codex ${args}`;
+    return parseReview(await Deno.readTextFile(outputFile));
+  } finally {
+    await Deno.remove(outputFile).catch(() => {});
   }
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content;
-  if (typeof content !== "string") {
-    throw new Error("OpenAI review returned no content.");
-  }
-  return JSON.parse(content) as ReviewResult;
 }
 
-function buildReviewPrompt(options: AiFixOptions, diff: string): string {
+function buildReviewPrompt(options: AiFixOptions): string {
   return [
-    `Mago was upgraded from ${options.fromVersion} to ${options.toVersion}. Review the diff below, which reconciles dprint-plugin-mago with that release.`,
+    `You are an independent reviewer for dprint-plugin-mago, a dprint plugin that wraps the mago-formatter crate to format PHP. Mago was just upgraded from ${options.fromVersion} to ${options.toVersion} and another AI edited this plugin to reconcile it. Review the UNCOMMITTED working-tree changes. You have READ-ONLY access: investigate freely, but do not modify, commit, or push anything.`,
+    ``,
+    `Investigate as needed:`,
+    `- Run \`git --no-pager diff\` (and \`git status\`) to see exactly what changed, including any new files.`,
+    `- Verify against the REAL mago-formatter ${options.toVersion} API by reading the source cargo downloaded:`,
+    `    find ~/.cargo/registry/src -type d -name 'mago-formatter-*'`,
+    `  then read its \`src/settings.rs\` (the \`FormatSettings\` struct) and any changed enums.`,
+    `- Read the plugin files to confirm they are consistent with each other and with upstream.`,
     ``,
     describeWiring(),
     ``,
-    `You only have the diff below (not the mago-formatter source), so review for internal consistency and obvious mistakes:`,
-    `- The \`build_format_settings\` mapping is self-consistent: every \`settings.<field>\` it assigns has a matching \`Configuration\` field and dprint config key, and enum arms line up with the plugin's enums.`,
-    `- Any newly exposed config option is wired through ALL layers: configuration.rs, resolve_config.rs, format_text.rs, deployment/schema.json, and README.md. A partial addition (e.g. a field added to the struct but missing from the schema or README) is a blocking issue.`,
+    `Verify specifically:`,
+    `- Every field assigned in \`build_format_settings\` still exists in mago-formatter's \`FormatSettings\` with that exact name (catch removed/renamed fields).`,
+    `- Any FormatSettings field newly added upstream is exposed through ALL layers: configuration.rs, resolve_config.rs, format_text.rs, deployment/schema.json, and README.md. A partial addition is a blocking issue.`,
     `- Naming conventions are consistent (Rust snake_case fields, camelCase dprint keys, matching schema/README).`,
     `- No obvious correctness bugs, and code style matches the surrounding code.`,
-    `- If something looks like it needs checking against the actual mago-formatter API (e.g. a renamed field), flag it as a blocking issue so the fixer re-verifies it against the upstream source.`,
     ``,
-    `Set approved=false if there is any blocking issue. Nits alone should not block. Keep issue descriptions specific and actionable.`,
-    ``,
-    `--- DIFF ---`,
-    diff,
+    `When done, your FINAL message must be ONLY a JSON object (no markdown code fences, no extra prose) of exactly this shape:`,
+    `{"approved": true|false, "summary": "one sentence", "issues": [{"severity": "blocking"|"nit", "description": "..."}]}`,
+    `Set approved=false if there is any blocking issue; nits alone do not block.`,
   ].join("\n");
+}
+
+function parseReview(message: string): ReviewResult {
+  const review = JSON.parse(extractJsonObject(message)) as ReviewResult;
+  if (typeof review.approved !== "boolean" || !Array.isArray(review.issues)) {
+    throw new Error(`Codex review returned malformed JSON:\n${message}`);
+  }
+  return review;
+}
+
+// Codex is instructed to emit only JSON, but tolerate an accidental code fence
+// or surrounding prose by extracting the outermost { ... } object.
+function extractJsonObject(text: string): string {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error(`Could not find a JSON object in Codex review output:\n${text}`);
+  }
+  return text.slice(start, end + 1);
 }
 
 function logReview(review: ReviewResult): void {
@@ -231,14 +226,6 @@ function logReview(review: ReviewResult): void {
   for (const issue of review.issues) {
     $.logLight(`  [${issue.severity}] ${issue.description}`);
   }
-}
-
-async function getWorkingTreeDiff(): Promise<string> {
-  // `-N` records intent-to-add so newly created files also appear in the diff.
-  await $`git add -N .`.quiet();
-  const diff = await $`git diff`.text();
-  const maxLen = 200_000;
-  return diff.length > maxLen ? diff.slice(0, maxLen) + "\n... (diff truncated)" : diff;
 }
 
 // setup ------------------------------------------------------------------------
