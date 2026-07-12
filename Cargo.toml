@@ -1,6 +1,6 @@
 [package]
 name = "dprint-plugin-mago"
-version = "0.20.0"
+version = "0.21.0"
 authors = ["David Sherret <dsherret@gmail.com>"]
 edition = "2024"
 homepage = "https://github.com/dprint/dprint-plugin-mago"
@@ -25,8 +25,8 @@ wasm = ["serde_json", "dprint-core/wasm"]
 
 [dependencies]
 anyhow = "1.0.51"
+bumpalo = "3"
 dprint-core = { version = "0.67.4", default-features = false }
-mago-allocator = "1.43.0"
 mago-formatter = "1.43.0"
 mago-php-version = "1.43.0"
 serde = { version = "1.0.210", features = ["derive"] }
