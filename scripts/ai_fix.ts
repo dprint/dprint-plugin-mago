@@ -33,8 +33,9 @@ export interface AiFixOptions {
 const REVIEW_MAX_ROUNDS = 2;
 
 export async function aiFixMagoUpdate(options: AiFixOptions): Promise<void> {
-  requireApiKey();
+  const apiKey = requireApiKey();
   await ensureCodexInstalled();
+  await codexLogin(apiKey);
 
   // stage 1: let Codex reconcile the update.
   await runCodex(buildFixPrompt(options));
@@ -242,10 +243,12 @@ async function getWorkingTreeDiff(): Promise<string> {
 
 // setup ------------------------------------------------------------------------
 
-function requireApiKey(): void {
-  if (!Deno.env.get("OPENAI_API_KEY")) {
+function requireApiKey(): string {
+  const apiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!apiKey) {
     throw new Error("OPENAI_API_KEY is not set. It is required to run the AI fixer and reviewer.");
   }
+  return apiKey;
 }
 
 async function ensureCodexInstalled(): Promise<void> {
@@ -255,4 +258,13 @@ async function ensureCodexInstalled(): Promise<void> {
   }
   $.logStep("Installing OpenAI Codex CLI...");
   await $`npm install -g @openai/codex`;
+}
+
+// `codex exec` does not read OPENAI_API_KEY on its own -- it needs credentials
+// stored via `codex login` first, otherwise its requests go out with no auth
+// header and the API returns 401. The key is piped over stdin so it never
+// appears in the process arguments.
+async function codexLogin(apiKey: string): Promise<void> {
+  $.logStep("Authenticating Codex with the OpenAI API key...");
+  await $`codex login --with-api-key`.stdinText(apiKey);
 }
