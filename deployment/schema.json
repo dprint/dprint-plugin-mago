@@ -12,6 +12,29 @@
       }, {
         "const": "next-line",
         "description": "Opening brace on the next line."
+      }, {
+        "const": "always-next-line",
+        "description": "Opening brace always on the next line."
+      }]
+    },
+    "sortOrder": {
+      "description": "Sort order.",
+      "type": "string",
+      "oneOf": [{
+        "const": "preserve",
+        "description": "Preserve the existing order."
+      }, {
+        "const": "alphanumeric-ascending",
+        "description": "Sort alphanumerically in ascending order."
+      }, {
+        "const": "alphanumeric-descending",
+        "description": "Sort alphanumerically in descending order."
+      }, {
+        "const": "length-ascending",
+        "description": "Sort by length in ascending order."
+      }, {
+        "const": "length-descending",
+        "description": "Sort by length in descending order."
       }]
     }
   },
@@ -46,6 +69,9 @@
       "type": "string",
       "default": "lf",
       "oneOf": [{
+        "const": "auto",
+        "description": "Automatically determine line endings."
+      }, {
         "const": "lf",
         "description": "Line feed."
       }, {
@@ -76,6 +102,11 @@
       "default": "same-line",
       "$ref": "#/definitions/braceStyle"
     },
+    "followingClauseOnNewline": {
+      "description": "Place else, elseif, catch, and finally clauses on a new line.",
+      "default": false,
+      "type": "boolean"
+    },
     "closureBraceStyle": {
       "description": "Brace placement for closures.",
       "default": "same-line",
@@ -93,7 +124,7 @@
     },
     "classlikeBraceStyle": {
       "description": "Brace placement for classes, interfaces, and traits.",
-      "default": "next-line",
+      "default": "always-next-line",
       "$ref": "#/definitions/braceStyle"
     },
     "inlineEmptyControlBraces": {
@@ -108,12 +139,12 @@
     },
     "inlineEmptyFunctionBraces": {
       "description": "Place empty function bodies on same line.",
-      "default": false,
+      "default": true,
       "type": "boolean"
     },
     "inlineEmptyMethodBraces": {
       "description": "Place empty method bodies on same line.",
-      "default": false,
+      "default": true,
       "type": "boolean"
     },
     "inlineEmptyConstructorBraces": {
@@ -148,13 +179,28 @@
       "default": true,
       "type": "boolean"
     },
+    "methodChainSemicolonOnNextLine": {
+      "description": "Place a method chain's semicolon on a new line.",
+      "default": false,
+      "type": "boolean"
+    },
     "preserveBreakingMemberAccessChain": {
       "description": "Preserve existing line breaks in method chains.",
       "default": false,
       "type": "boolean"
     },
+    "preserveBreakingMemberAccessChainFirstMethodOnSameLine": {
+      "description": "Keep the first method call on the same line in preserved member access chains.",
+      "default": false,
+      "type": "boolean"
+    },
     "preserveBreakingArgumentList": {
       "description": "Preserve existing line breaks in argument lists.",
+      "default": false,
+      "type": "boolean"
+    },
+    "inlineSingleBreakingValueArgument": {
+      "description": "Inline a single value argument in a breaking argument list.",
       "default": false,
       "type": "boolean"
     },
@@ -178,14 +224,49 @@
       "default": false,
       "type": "boolean"
     },
+    "preserveBreakingConditionExpression": {
+      "description": "Preserve existing line breaks in condition expressions.",
+      "default": false,
+      "type": "boolean"
+    },
+    "preserveBreakingBinaryExpression": {
+      "description": "Preserve existing line breaks in binary expressions.",
+      "default": false,
+      "type": "boolean"
+    },
     "breakPromotedPropertiesList": {
       "description": "Always break parameter lists with promoted properties.",
+      "default": true,
+      "type": "boolean"
+    },
+    "parameterAttributeOnNewLine": {
+      "description": "Place parameter attributes on a new line.",
       "default": true,
       "type": "boolean"
     },
     "lineBeforeBinaryOperator": {
       "description": "Place binary operator on next line when breaking.",
       "default": true,
+      "type": "boolean"
+    },
+    "indentBinaryExpressionContinuation": {
+      "description": "Indent continued binary expressions.",
+      "default": false,
+      "type": "boolean"
+    },
+    "omitRedundantArithmeticBinaryExpressionParentheses": {
+      "description": "Omit redundant parentheses in arithmetic binary expressions.",
+      "default": false,
+      "type": "boolean"
+    },
+    "omitRedundantBitwiseBinaryExpressionParentheses": {
+      "description": "Omit redundant parentheses in bitwise binary expressions.",
+      "default": false,
+      "type": "boolean"
+    },
+    "preserveRedundantLogicalBinaryExpressionParentheses": {
+      "description": "Preserve redundant parentheses in logical binary expressions.",
+      "default": false,
       "type": "boolean"
     },
     "alwaysBreakNamedArgumentsList": {
@@ -195,6 +276,16 @@
     },
     "alwaysBreakAttributeNamedArgumentLists": {
       "description": "Always break named argument lists in attributes.",
+      "default": false,
+      "type": "boolean"
+    },
+    "alignNamedArguments": {
+      "description": "Align named arguments in columns.",
+      "default": false,
+      "type": "boolean"
+    },
+    "alignParameters": {
+      "description": "Align parameters in columns.",
       "default": false,
       "type": "boolean"
     },
@@ -209,9 +300,14 @@
       "type": "boolean"
     },
     "sortUses": {
-      "description": "Sort use statements alphabetically.",
-      "default": true,
-      "type": "boolean"
+      "description": "Sort use statements.",
+      "default": "alphanumeric-ascending",
+      "oneOf": [{
+        "$ref": "#/definitions/sortOrder"
+      }, {
+        "type": "boolean",
+        "description": "Legacy shorthand: true sorts ascending and false preserves order."
+      }]
     },
     "sortClassMethods": {
       "description": "Sort class methods by visibility and type.",
@@ -238,6 +334,9 @@
       }, {
         "const": "null-pipe",
         "description": "Use null pipe syntax (Type|null)."
+      }, {
+        "const": "null-pipe-last",
+        "description": "Place null last in pipe type hints."
       }]
     },
     "parenthesesAroundNewInMemberAccess": {
@@ -273,6 +372,11 @@
     "spaceBeforeHookParameterListParenthesis": {
       "description": "Add space before hook parameters.",
       "default": false,
+      "type": "boolean"
+    },
+    "inlineAbstractPropertyHooks": {
+      "description": "Inline abstract property hooks.",
+      "default": true,
       "type": "boolean"
     },
     "spaceBeforeClosureUseClauseParenthesis": {
@@ -340,6 +444,11 @@
       "default": false,
       "type": "boolean"
     },
+    "openingTagOnOwnLine": {
+      "description": "Place the PHP opening tag on its own line.",
+      "default": true,
+      "type": "boolean"
+    },
     "emptyLineAfterOpeningTag": {
       "description": "Add empty line after opening <?php tag.",
       "default": true,
@@ -348,6 +457,11 @@
     "emptyLineAfterDeclare": {
       "description": "Add empty line after declare statement.",
       "default": true,
+      "type": "boolean"
+    },
+    "combineOpeningTagAndDeclare": {
+      "description": "Keep the opening tag and declare statement together.",
+      "default": false,
       "type": "boolean"
     },
     "emptyLineAfterNamespace": {
@@ -372,6 +486,16 @@
     },
     "emptyLineAfterClassLikeConstant": {
       "description": "Add empty line after class constant.",
+      "default": false,
+      "type": "boolean"
+    },
+    "emptyLineAfterClassLikeOpen": {
+      "description": "Add an empty line after an opening class-like brace.",
+      "default": false,
+      "type": "boolean"
+    },
+    "emptyLineBeforeClassLikeClose": {
+      "description": "Add an empty line before a closing class-like brace.",
       "default": false,
       "type": "boolean"
     },
@@ -408,6 +532,31 @@
     "separateClassLikeMembers": {
       "description": "Separate different kinds of class members with blank line.",
       "default": true,
+      "type": "boolean"
+    },
+    "attributesOrder": {
+      "description": "Sort attributes.",
+      "default": "preserve",
+      "$ref": "#/definitions/sortOrder"
+    },
+    "separateAttributes": {
+      "description": "Place attributes on separate lines.",
+      "default": false,
+      "type": "boolean"
+    },
+    "separateTraitUse": {
+      "description": "Separate trait use statements from adaptations.",
+      "default": true,
+      "type": "boolean"
+    },
+    "indentHeredoc": {
+      "description": "Indent heredoc and nowdoc content.",
+      "default": true,
+      "type": "boolean"
+    },
+    "uppercaseLiteralKeyword": {
+      "description": "Use uppercase boolean and null literals.",
+      "default": false,
       "type": "boolean"
     }
   }

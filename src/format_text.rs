@@ -2,13 +2,14 @@ use std::borrow::Cow;
 use std::path::Path;
 
 use anyhow::Result;
-use bumpalo::Bump;
+use mago_allocator::LocalArena;
+use mago_formatter::Formatter;
 use mago_formatter::settings::BraceStyle;
 use mago_formatter::settings::EndOfLine;
 use mago_formatter::settings::FormatSettings;
 use mago_formatter::settings::MethodChainBreakingStyle;
 use mago_formatter::settings::NullTypeHint;
-use mago_formatter::Formatter;
+use mago_formatter::settings::SortOrder;
 use mago_php_version::PHPVersion;
 
 use crate::configuration::Configuration;
@@ -24,7 +25,7 @@ pub fn format_text(file_path: &Path, input_text: &str, config: &Configuration) -
     return Ok(None);
   }
 
-  let arena = Bump::new();
+  let arena = LocalArena::new();
   let php_version = PHPVersion::new(
     config.php_version_major.unwrap_or(8) as u32,
     config.php_version_minor.unwrap_or(4) as u32,
@@ -65,6 +66,7 @@ fn build_format_settings(config: &Configuration) -> FormatSettings {
       crate::configuration::EndOfLine::Lf => EndOfLine::Lf,
       crate::configuration::EndOfLine::Crlf => EndOfLine::Crlf,
       crate::configuration::EndOfLine::Cr => EndOfLine::Cr,
+      crate::configuration::EndOfLine::Auto => EndOfLine::Auto,
     };
   }
 
@@ -84,30 +86,38 @@ fn build_format_settings(config: &Configuration) -> FormatSettings {
     settings.control_brace_style = match style {
       crate::configuration::BraceStyle::SameLine => BraceStyle::SameLine,
       crate::configuration::BraceStyle::NextLine => BraceStyle::NextLine,
+      crate::configuration::BraceStyle::AlwaysNextLine => BraceStyle::AlwaysNextLine,
     };
+  }
+  if let Some(v) = config.following_clause_on_newline {
+    settings.following_clause_on_newline = v;
   }
   if let Some(ref style) = config.closure_brace_style {
     settings.closure_brace_style = match style {
       crate::configuration::BraceStyle::SameLine => BraceStyle::SameLine,
       crate::configuration::BraceStyle::NextLine => BraceStyle::NextLine,
+      crate::configuration::BraceStyle::AlwaysNextLine => BraceStyle::AlwaysNextLine,
     };
   }
   if let Some(ref style) = config.function_brace_style {
     settings.function_brace_style = match style {
       crate::configuration::BraceStyle::SameLine => BraceStyle::SameLine,
       crate::configuration::BraceStyle::NextLine => BraceStyle::NextLine,
+      crate::configuration::BraceStyle::AlwaysNextLine => BraceStyle::AlwaysNextLine,
     };
   }
   if let Some(ref style) = config.method_brace_style {
     settings.method_brace_style = match style {
       crate::configuration::BraceStyle::SameLine => BraceStyle::SameLine,
       crate::configuration::BraceStyle::NextLine => BraceStyle::NextLine,
+      crate::configuration::BraceStyle::AlwaysNextLine => BraceStyle::AlwaysNextLine,
     };
   }
   if let Some(ref style) = config.classlike_brace_style {
     settings.classlike_brace_style = match style {
       crate::configuration::BraceStyle::SameLine => BraceStyle::SameLine,
       crate::configuration::BraceStyle::NextLine => BraceStyle::NextLine,
+      crate::configuration::BraceStyle::AlwaysNextLine => BraceStyle::AlwaysNextLine,
     };
   }
 
@@ -144,13 +154,22 @@ fn build_format_settings(config: &Configuration) -> FormatSettings {
   if let Some(v) = config.first_method_chain_on_new_line {
     settings.first_method_chain_on_new_line = v;
   }
+  if let Some(v) = config.method_chain_semicolon_on_next_line {
+    settings.method_chain_semicolon_on_next_line = v;
+  }
   if let Some(v) = config.preserve_breaking_member_access_chain {
     settings.preserve_breaking_member_access_chain = v;
+  }
+  if let Some(v) = config.preserve_breaking_member_access_chain_first_method_on_same_line {
+    settings.preserve_breaking_member_access_chain_first_method_on_same_line = v;
   }
 
   // Preservation flags
   if let Some(v) = config.preserve_breaking_argument_list {
     settings.preserve_breaking_argument_list = v;
+  }
+  if let Some(v) = config.inline_single_breaking_value_argument {
+    settings.inline_single_breaking_value_argument = v;
   }
   if let Some(v) = config.preserve_breaking_array_like {
     settings.preserve_breaking_array_like = v;
@@ -164,19 +183,46 @@ fn build_format_settings(config: &Configuration) -> FormatSettings {
   if let Some(v) = config.preserve_breaking_conditional_expression {
     settings.preserve_breaking_conditional_expression = v;
   }
+  if let Some(v) = config.preserve_breaking_condition_expression {
+    settings.preserve_breaking_condition_expression = v;
+  }
+  if let Some(v) = config.preserve_breaking_binary_expression {
+    settings.preserve_breaking_binary_expression = v;
+  }
 
   // Operator and structural settings
   if let Some(v) = config.break_promoted_properties_list {
     settings.break_promoted_properties_list = v;
   }
+  if let Some(v) = config.parameter_attribute_on_new_line {
+    settings.parameter_attribute_on_new_line = v;
+  }
   if let Some(v) = config.line_before_binary_operator {
     settings.line_before_binary_operator = v;
+  }
+  if let Some(v) = config.indent_binary_expression_continuation {
+    settings.indent_binary_expression_continuation = v;
+  }
+  if let Some(v) = config.omit_redundant_arithmetic_binary_expression_parentheses {
+    settings.omit_redundant_arithmetic_binary_expression_parentheses = v;
+  }
+  if let Some(v) = config.omit_redundant_bitwise_binary_expression_parentheses {
+    settings.omit_redundant_bitwise_binary_expression_parentheses = v;
+  }
+  if let Some(v) = config.preserve_redundant_logical_binary_expression_parentheses {
+    settings.preserve_redundant_logical_binary_expression_parentheses = v;
   }
   if let Some(v) = config.always_break_named_arguments_list {
     settings.always_break_named_arguments_list = v;
   }
   if let Some(v) = config.always_break_attribute_named_argument_lists {
     settings.always_break_attribute_named_argument_lists = v;
+  }
+  if let Some(v) = config.align_named_arguments {
+    settings.align_named_arguments = v;
+  }
+  if let Some(v) = config.align_parameters {
+    settings.align_parameters = v;
   }
   if let Some(v) = config.array_table_style_alignment {
     settings.array_table_style_alignment = v;
@@ -187,7 +233,7 @@ fn build_format_settings(config: &Configuration) -> FormatSettings {
 
   // Use statement organization
   if let Some(v) = config.sort_uses {
-    settings.sort_uses = v;
+    settings.sort_uses = mago_formatter::settings::SortUses(map_sort_uses(v));
   }
   if let Some(v) = config.sort_class_methods {
     settings.sort_class_methods = v;
@@ -204,6 +250,7 @@ fn build_format_settings(config: &Configuration) -> FormatSettings {
     settings.null_type_hint = match style {
       crate::configuration::NullTypeHint::Question => NullTypeHint::Question,
       crate::configuration::NullTypeHint::NullPipe => NullTypeHint::NullPipe,
+      crate::configuration::NullTypeHint::NullPipeLast => NullTypeHint::NullPipeLast,
     };
   }
   if let Some(v) = config.parentheses_around_new_in_member_access {
@@ -228,6 +275,9 @@ fn build_format_settings(config: &Configuration) -> FormatSettings {
   }
   if let Some(v) = config.space_before_hook_parameter_list_parenthesis {
     settings.space_before_hook_parameter_list_parenthesis = v;
+  }
+  if let Some(v) = config.inline_abstract_property_hooks {
+    settings.inline_abstract_property_hooks = v;
   }
   if let Some(v) = config.space_before_closure_use_clause_parenthesis {
     settings.space_before_closure_use_clause_parenthesis = v;
@@ -270,11 +320,17 @@ fn build_format_settings(config: &Configuration) -> FormatSettings {
   if let Some(v) = config.empty_line_after_control_structure {
     settings.empty_line_after_control_structure = v;
   }
+  if let Some(v) = config.opening_tag_on_own_line {
+    settings.opening_tag_on_own_line = v;
+  }
   if let Some(v) = config.empty_line_after_opening_tag {
     settings.empty_line_after_opening_tag = v;
   }
   if let Some(v) = config.empty_line_after_declare {
     settings.empty_line_after_declare = v;
+  }
+  if let Some(v) = config.combine_opening_tag_and_declare {
+    settings.combine_opening_tag_and_declare = v;
   }
   if let Some(v) = config.empty_line_after_namespace {
     settings.empty_line_after_namespace = v;
@@ -290,6 +346,12 @@ fn build_format_settings(config: &Configuration) -> FormatSettings {
   }
   if let Some(v) = config.empty_line_after_class_like_constant {
     settings.empty_line_after_class_like_constant = v;
+  }
+  if let Some(v) = config.empty_line_after_class_like_open {
+    settings.empty_line_after_class_like_open = v;
+  }
+  if let Some(v) = config.empty_line_before_class_like_close {
+    settings.empty_line_before_class_like_close = v;
   }
   if let Some(v) = config.empty_line_after_enum_case {
     settings.empty_line_after_enum_case = v;
@@ -312,8 +374,43 @@ fn build_format_settings(config: &Configuration) -> FormatSettings {
   if let Some(v) = config.separate_class_like_members {
     settings.separate_class_like_members = v;
   }
+  if let Some(ref order) = config.attributes_order {
+    settings.attributes_order = map_sort_order(*order);
+  }
+  if let Some(v) = config.separate_attributes {
+    settings.separate_attributes = v;
+  }
+  if let Some(v) = config.separate_trait_use {
+    settings.separate_trait_use = v;
+  }
+  if let Some(v) = config.indent_heredoc {
+    settings.indent_heredoc = v;
+  }
+  if let Some(v) = config.uppercase_literal_keyword {
+    settings.uppercase_literal_keyword = v;
+  }
 
   settings
+}
+
+fn map_sort_order(order: crate::configuration::SortOrder) -> SortOrder {
+  match order {
+    crate::configuration::SortOrder::Preserve => SortOrder::Preserve,
+    crate::configuration::SortOrder::AlphanumericAscending => SortOrder::AlphanumericAscending,
+    crate::configuration::SortOrder::AlphanumericDescending => SortOrder::AlphanumericDescending,
+    crate::configuration::SortOrder::LengthAscending => SortOrder::LengthAscending,
+    crate::configuration::SortOrder::LengthDescending => SortOrder::LengthDescending,
+  }
+}
+
+fn map_sort_uses(sort_uses: crate::configuration::SortUses) -> SortOrder {
+  match sort_uses {
+    crate::configuration::SortUses::Preserve => SortOrder::Preserve,
+    crate::configuration::SortUses::AlphanumericAscending => SortOrder::AlphanumericAscending,
+    crate::configuration::SortUses::AlphanumericDescending => SortOrder::AlphanumericDescending,
+    crate::configuration::SortUses::LengthAscending => SortOrder::LengthAscending,
+    crate::configuration::SortUses::LengthDescending => SortOrder::LengthDescending,
+  }
 }
 
 #[cfg(test)]
@@ -332,8 +429,7 @@ mod test {
   fn returns_none_for_non_php() {
     let input = "const x = 1;";
     let config = crate::configuration::Configuration::default();
-    let result = format_text(std::path::Path::new("test.js"), input, &config)
-      .unwrap();
+    let result = format_text(std::path::Path::new("test.js"), input, &config).unwrap();
     assert!(result.is_none());
   }
 }

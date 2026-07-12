@@ -30,7 +30,7 @@ fn test_specs() {
         let config_result = resolve_config(spec_config, &global_config);
         ensure_no_diagnostics(&config_result.diagnostics);
 
-        format_text(file_path, &file_text, &config_result.config)
+        format_text(file_path, file_text, &config_result.config)
       })
     },
     Arc::new(move |_file_path, _file_text, _spec_config| panic!("Plugin does not support dprint-core tracing.")),
@@ -47,12 +47,7 @@ fn should_fail_on_parse_error_php() {
 #[test]
 fn should_format_basic_php() {
   let config = Configuration::default();
-  let result = format_text(
-    &PathBuf::from("./file.php"),
-    "<?php\necho   'hello'  ;",
-    &config,
-  )
-  .unwrap();
+  let result = format_text(&PathBuf::from("./file.php"), "<?php\necho   'hello'  ;", &config).unwrap();
   assert!(result.is_some());
 }
 

@@ -37,7 +37,11 @@ pub fn resolve_config(
     .or(global_config.indent_width);
   let print_width = get_nullable_value(&mut config, "printWidth", &mut diagnostics)
     .or_else(|| get_nullable_value(&mut config, "lineWidth", &mut diagnostics))
-    .or(global_config.line_width.map(|l| std::cmp::min(u16::MAX as u32, l) as u16));
+    .or(
+      global_config
+        .line_width
+        .map(|l| std::cmp::min(u16::MAX as u32, l) as u16),
+    );
 
   let resolved_config = Configuration {
     // PHP version settings
@@ -46,15 +50,13 @@ pub fn resolve_config(
 
     // Core layout settings
     print_width,
-    tab_width: tab_width.map(|v| v as u8),
+    tab_width,
     use_tabs,
-    end_of_line: get_nullable_value(&mut config, "endOfLine", &mut diagnostics).or(
-      match global_config.new_line_kind {
-        Some(NewLineKind::CarriageReturnLineFeed) => Some(EndOfLine::Crlf),
-        Some(NewLineKind::LineFeed) => Some(EndOfLine::Lf),
-        _ => None,
-      },
-    ),
+    end_of_line: get_nullable_value(&mut config, "endOfLine", &mut diagnostics).or(match global_config.new_line_kind {
+      Some(NewLineKind::CarriageReturnLineFeed) => Some(EndOfLine::Crlf),
+      Some(NewLineKind::LineFeed) => Some(EndOfLine::Lf),
+      _ => None,
+    }),
 
     // Quote and punctuation
     single_quote: get_nullable_value(&mut config, "singleQuote", &mut diagnostics),
@@ -63,6 +65,7 @@ pub fn resolve_config(
 
     // Brace styles
     control_brace_style: get_nullable_value(&mut config, "controlBraceStyle", &mut diagnostics),
+    following_clause_on_newline: get_nullable_value(&mut config, "followingClauseOnNewline", &mut diagnostics),
     closure_brace_style: get_nullable_value(&mut config, "closureBraceStyle", &mut diagnostics),
     function_brace_style: get_nullable_value(&mut config, "functionBraceStyle", &mut diagnostics),
     method_brace_style: get_nullable_value(&mut config, "methodBraceStyle", &mut diagnostics),
@@ -84,18 +87,43 @@ pub fn resolve_config(
     // Method chaining
     method_chain_breaking_style: get_nullable_value(&mut config, "methodChainBreakingStyle", &mut diagnostics),
     first_method_chain_on_new_line: get_nullable_value(&mut config, "firstMethodChainOnNewLine", &mut diagnostics),
+    method_chain_semicolon_on_next_line: get_nullable_value(
+      &mut config,
+      "methodChainSemicolonOnNextLine",
+      &mut diagnostics,
+    ),
     preserve_breaking_member_access_chain: get_nullable_value(
       &mut config,
       "preserveBreakingMemberAccessChain",
       &mut diagnostics,
     ),
+    preserve_breaking_member_access_chain_first_method_on_same_line: get_nullable_value(
+      &mut config,
+      "preserveBreakingMemberAccessChainFirstMethodOnSameLine",
+      &mut diagnostics,
+    ),
 
     // Preservation flags
     preserve_breaking_argument_list: get_nullable_value(&mut config, "preserveBreakingArgumentList", &mut diagnostics),
+    inline_single_breaking_value_argument: get_nullable_value(
+      &mut config,
+      "inlineSingleBreakingValueArgument",
+      &mut diagnostics,
+    ),
     preserve_breaking_array_like: get_nullable_value(&mut config, "preserveBreakingArrayLike", &mut diagnostics),
     preserve_breaking_parameter_list: get_nullable_value(
       &mut config,
       "preserveBreakingParameterList",
+      &mut diagnostics,
+    ),
+    preserve_breaking_condition_expression: get_nullable_value(
+      &mut config,
+      "preserveBreakingConditionExpression",
+      &mut diagnostics,
+    ),
+    preserve_breaking_binary_expression: get_nullable_value(
+      &mut config,
+      "preserveBreakingBinaryExpression",
       &mut diagnostics,
     ),
     preserve_breaking_attribute_list: get_nullable_value(
@@ -111,12 +139,35 @@ pub fn resolve_config(
 
     // Operator and structural settings
     break_promoted_properties_list: get_nullable_value(&mut config, "breakPromotedPropertiesList", &mut diagnostics),
+    parameter_attribute_on_new_line: get_nullable_value(&mut config, "parameterAttributeOnNewLine", &mut diagnostics),
     line_before_binary_operator: get_nullable_value(&mut config, "lineBeforeBinaryOperator", &mut diagnostics),
+    indent_binary_expression_continuation: get_nullable_value(
+      &mut config,
+      "indentBinaryExpressionContinuation",
+      &mut diagnostics,
+    ),
+    omit_redundant_arithmetic_binary_expression_parentheses: get_nullable_value(
+      &mut config,
+      "omitRedundantArithmeticBinaryExpressionParentheses",
+      &mut diagnostics,
+    ),
+    omit_redundant_bitwise_binary_expression_parentheses: get_nullable_value(
+      &mut config,
+      "omitRedundantBitwiseBinaryExpressionParentheses",
+      &mut diagnostics,
+    ),
+    preserve_redundant_logical_binary_expression_parentheses: get_nullable_value(
+      &mut config,
+      "preserveRedundantLogicalBinaryExpressionParentheses",
+      &mut diagnostics,
+    ),
     always_break_named_arguments_list: get_nullable_value(
       &mut config,
       "alwaysBreakNamedArgumentsList",
       &mut diagnostics,
     ),
+    align_named_arguments: get_nullable_value(&mut config, "alignNamedArguments", &mut diagnostics),
+    align_parameters: get_nullable_value(&mut config, "alignParameters", &mut diagnostics),
     always_break_attribute_named_argument_lists: get_nullable_value(
       &mut config,
       "alwaysBreakAttributeNamedArgumentLists",
@@ -158,6 +209,7 @@ pub fn resolve_config(
       "spaceBeforeHookParameterListParenthesis",
       &mut diagnostics,
     ),
+    inline_abstract_property_hooks: get_nullable_value(&mut config, "inlineAbstractPropertyHooks", &mut diagnostics),
     space_before_closure_use_clause_parenthesis: get_nullable_value(
       &mut config,
       "spaceBeforeClosureUseClauseParenthesis",
@@ -225,8 +277,10 @@ pub fn resolve_config(
       "emptyLineAfterControlStructure",
       &mut diagnostics,
     ),
+    opening_tag_on_own_line: get_nullable_value(&mut config, "openingTagOnOwnLine", &mut diagnostics),
     empty_line_after_opening_tag: get_nullable_value(&mut config, "emptyLineAfterOpeningTag", &mut diagnostics),
     empty_line_after_declare: get_nullable_value(&mut config, "emptyLineAfterDeclare", &mut diagnostics),
+    combine_opening_tag_and_declare: get_nullable_value(&mut config, "combineOpeningTagAndDeclare", &mut diagnostics),
     empty_line_after_namespace: get_nullable_value(&mut config, "emptyLineAfterNamespace", &mut diagnostics),
     empty_line_after_use: get_nullable_value(&mut config, "emptyLineAfterUse", &mut diagnostics),
     empty_line_after_symbols: get_nullable_value(&mut config, "emptyLineAfterSymbols", &mut diagnostics),
@@ -234,6 +288,12 @@ pub fn resolve_config(
     empty_line_after_class_like_constant: get_nullable_value(
       &mut config,
       "emptyLineAfterClassLikeConstant",
+      &mut diagnostics,
+    ),
+    empty_line_after_class_like_open: get_nullable_value(&mut config, "emptyLineAfterClassLikeOpen", &mut diagnostics),
+    empty_line_before_class_like_close: get_nullable_value(
+      &mut config,
+      "emptyLineBeforeClassLikeClose",
       &mut diagnostics,
     ),
     empty_line_after_enum_case: get_nullable_value(&mut config, "emptyLineAfterEnumCase", &mut diagnostics),
@@ -247,6 +307,11 @@ pub fn resolve_config(
       &mut diagnostics,
     ),
     separate_class_like_members: get_nullable_value(&mut config, "separateClassLikeMembers", &mut diagnostics),
+    attributes_order: get_nullable_value(&mut config, "attributesOrder", &mut diagnostics),
+    separate_attributes: get_nullable_value(&mut config, "separateAttributes", &mut diagnostics),
+    separate_trait_use: get_nullable_value(&mut config, "separateTraitUse", &mut diagnostics),
+    indent_heredoc: get_nullable_value(&mut config, "indentHeredoc", &mut diagnostics),
+    uppercase_literal_keyword: get_nullable_value(&mut config, "uppercaseLiteralKeyword", &mut diagnostics),
   };
 
   diagnostics.extend(get_unknown_property_diagnostics(config));
