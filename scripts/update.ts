@@ -3,6 +3,7 @@
  * publishes a new version of the plugin if so.
  */
 import { $, CargoToml, semver } from "automation";
+import { aiFixMagoUpdate } from "./ai_fix.ts";
 
 const rootDirPath = $.path(import.meta.dirname!).parentOrThrow();
 const cargoToml = new CargoToml(rootDirPath.join("Cargo.toml"));
@@ -51,9 +52,33 @@ if (hasPhpVersionUpdate) {
   );
 }
 
-// run the tests
-$.logStep("Running tests...");
-await $`cargo test`;
+// Verify the update. A clean patch bump publishes exactly as before. A minor
+// bump always gets an AI review (Mago may have added settings without breaking
+// the build), and a patch bump that fails the checks gets an AI fix attempt.
+$.logStep("Running checks (test + clippy)...");
+const checks = await runChecks();
+
+if (!isPatchBump || !checks.passed) {
+  if (checks.passed) {
+    $.logStep("Minor Mago update — running AI review for new/changed settings...");
+  } else {
+    $.logStep("Patch update failed the checks — running AI fix...");
+  }
+  await aiFixMagoUpdate({
+    isPatchBump,
+    fromVersion: currentVersions.formatter,
+    toVersion: latestVersions.formatter,
+    checksPassed: checks.passed,
+    // hand the failing output to the AI so it can go straight to fixing
+    // instead of re-running the checks just to rediscover the errors.
+    checkOutput: checks.output,
+  });
+
+  // the AI must leave the project in a passing state, otherwise fail the
+  // workflow (nothing gets published and the maintainer is notified).
+  $.logStep("Re-running checks after AI changes...");
+  await assertChecks();
+}
 
 if (Deno.args.includes("--skip-publish")) {
   Deno.exit(0);
@@ -75,6 +100,35 @@ await $`git commit -m ${newVersion}`;
 await $`git push origin main`;
 await $`git tag ${newVersion}`;
 await $`git push origin ${newVersion}`;
+
+// the checks that must pass before publishing. clippy is included because CI
+// (and Codex) run it with warnings denied, so a clippy failure is as breaking
+// as a test failure. `inheritPiped` + `captureCombined` streams the output to
+// the CI log live while also capturing it so a failure can be handed to the AI.
+async function runChecks(): Promise<{ passed: boolean; output: string }> {
+  const test = await capture($`cargo test`);
+  const clippy = await capture($`cargo clippy --all-targets --all-features -- -D warnings`);
+  const failures = [test, clippy].filter((r) => r.code !== 0);
+  return {
+    passed: failures.length === 0,
+    output: failures.map((r) => r.combined).join("\n\n"),
+  };
+}
+
+function capture(command: ReturnType<typeof $>) {
+  return command
+    .stdout("inheritPiped")
+    .stderr("inheritPiped")
+    .captureCombined()
+    .noThrow();
+}
+
+// same checks as `runChecks`, but throws on the first failure so the workflow
+// aborts before anything is committed, tagged, or published.
+async function assertChecks(): Promise<void> {
+  await $`cargo test`;
+  await $`cargo clippy --all-targets --all-features -- -D warnings`;
+}
 
 interface MagoVersions {
   formatter: string;
