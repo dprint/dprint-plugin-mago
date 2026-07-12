@@ -3,6 +3,7 @@
  * publishes a new version of the plugin if so.
  */
 import { $, CargoToml, semver } from "automation";
+import { aiFixMagoUpdate } from "./ai_fix.ts";
 
 const rootDirPath = $.path(import.meta.dirname!).parentOrThrow();
 const cargoToml = new CargoToml(rootDirPath.join("Cargo.toml"));
@@ -51,9 +52,30 @@ if (hasPhpVersionUpdate) {
   );
 }
 
-// run the tests
+// Verify the update. A clean patch bump publishes exactly as before. A minor
+// bump always gets an AI review (Mago may have added settings without breaking
+// the build), and a failing patch bump gets an AI fix attempt.
 $.logStep("Running tests...");
-await $`cargo test`;
+const testsPassed = (await $`cargo test`.noThrow()).code === 0;
+
+if (!isPatchBump || !testsPassed) {
+  if (testsPassed) {
+    $.logStep("Minor Mago update — running AI review for new/changed settings...");
+  } else {
+    $.logStep("Patch update failed to build/test — running AI fix...");
+  }
+  await aiFixMagoUpdate({
+    isPatchBump,
+    fromVersion: currentVersions.formatter,
+    toVersion: latestVersions.formatter,
+    testsPassed,
+  });
+
+  // the AI must leave the project in a passing state, otherwise fail the
+  // workflow (nothing gets published and the maintainer is notified).
+  $.logStep("Re-running tests after AI changes...");
+  await $`cargo test`;
+}
 
 if (Deno.args.includes("--skip-publish")) {
   Deno.exit(0);

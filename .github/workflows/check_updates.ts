@@ -15,8 +15,18 @@ const buildJob = {
     },
     { uses: "denoland/setup-deno@v2" },
     { uses: "dsherret/rust-toolchain-file@v1" },
+    // node is needed so the update script can install and run the OpenAI
+    // Codex CLI (@openai/codex) when it has to reconcile a Mago update.
+    { uses: "actions/setup-node@v6", with: { "node-version": "24.x" } },
     {
       name: "Run script",
+      env: {
+        OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}",
+        // model that fixes/wires up the Mago update (Codex)
+        CODEX_MODEL: "gpt-5.6-terra",
+        // separate model that independently reviews the changes
+        REVIEW_MODEL: "gpt-5.6-sol",
+      },
       run: [
         `git config user.email "dprintbot@users.noreply.github.com"`,
         `git config user.name "dprintbot"`,
