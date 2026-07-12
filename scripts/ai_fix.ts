@@ -4,12 +4,12 @@
  *
  *   1. a Codex agentic session edits the source and runs `cargo test` until
  *      green (fixing breakage and/or wiring up new `FormatSettings`), then
- *   2. a SEPARATE reviewer model reviews the result in a read-only Codex
- *      sandbox, so it can investigate (read the upstream mago-formatter source,
- *      grep the repo) but cannot modify anything. If it finds blocking issues
- *      they are fed back to the stage-1 Codex for another pass, bounded by
- *      `REVIEW_MAX_ROUNDS`. If it still isn't approved, this throws so the
- *      workflow fails and nothing is published.
+ *   2. a SEPARATE reviewer model reviews the result with Codex, so it can
+ *      investigate (read the upstream mago-formatter source, grep the repo). It
+ *      is instructed to review only and not modify anything. If it finds
+ *      blocking issues they are fed back to the stage-1 Codex for another pass,
+ *      bounded by `REVIEW_MAX_ROUNDS`. If it still isn't approved, this throws
+ *      so the workflow fails and nothing is published.
  *
  * Two situations call this:
  *   - a patch bump that failed to build/test (fix the breakage), and
@@ -146,10 +146,18 @@ interface ReviewIssue {
   description: string;
 }
 
-// The reviewer runs Codex too, but in a READ-ONLY sandbox so it can actually
-// investigate (read the mago-formatter source cargo downloaded, grep the repo,
-// verify field names against the real upstream API) without being able to
-// modify anything. Its verdict is captured as JSON via --output-last-message.
+// The reviewer runs Codex too so it can actually investigate (read the
+// mago-formatter source cargo downloaded, grep the repo, verify field names
+// against the real upstream API). Its verdict is captured as JSON via
+// --output-last-message.
+//
+// NOTE: we deliberately do NOT use `--sandbox read-only` here. That makes Codex
+// wrap commands in bubblewrap, which cannot set up its network namespace on the
+// GitHub Actions runner ("bwrap: loopback: Failed RTM_NEWADDR: Operation not
+// permitted"), so every command the reviewer runs fails before executing. We
+// use the same no-sandbox mode as the fixer and enforce read-only via the
+// prompt instead. (CI is itself a throwaway VM, and the final check gate in
+// update.ts re-verifies whatever ends up in the working tree.)
 async function reviewChanges(options: AiFixOptions): Promise<ReviewResult> {
   // default to a different model than the Codex fixer so the review is a
   // genuinely independent second opinion.
@@ -160,12 +168,11 @@ async function reviewChanges(options: AiFixOptions): Promise<ReviewResult> {
 
   const outputFile = await Deno.makeTempFile({ prefix: "codex-review-", suffix: ".json" });
   try {
-    $.logStep(`Reviewing changes with Codex (${model}, read-only)...`);
+    $.logStep(`Reviewing changes with Codex (${model})...`);
     const args = [
       "exec",
       "--skip-git-repo-check",
-      "--sandbox",
-      "read-only",
+      "--dangerously-bypass-approvals-and-sandbox",
       "--model",
       model,
       "--output-last-message",
@@ -181,7 +188,8 @@ async function reviewChanges(options: AiFixOptions): Promise<ReviewResult> {
 
 function buildReviewPrompt(options: AiFixOptions): string {
   return [
-    `You are an independent reviewer for dprint-plugin-mago, a dprint plugin that wraps the mago-formatter crate to format PHP. Mago was just upgraded from ${options.fromVersion} to ${options.toVersion} and another AI edited this plugin to reconcile it. Review the UNCOMMITTED working-tree changes. You have READ-ONLY access: investigate freely, but do not modify, commit, or push anything.`,
+    `You are an independent reviewer for dprint-plugin-mago, a dprint plugin that wraps the mago-formatter crate to format PHP. Mago was just upgraded from ${options.fromVersion} to ${options.toVersion} and another AI edited this plugin to reconcile it. Review the UNCOMMITTED working-tree changes.`,
+    `IMPORTANT: this is REVIEW ONLY. Read any files and run read-only commands (git diff, cat, grep, find, etc.) to investigate, but you MUST NOT edit, create, or delete any files, and MUST NOT run git commit or git push. Leave the working tree exactly as you found it.`,
     ``,
     `Investigate as needed:`,
     `- Run \`git --no-pager diff\` (and \`git status\`) to see exactly what changed, including any new files.`,
