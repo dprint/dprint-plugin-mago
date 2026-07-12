@@ -113,12 +113,14 @@ function buildFixPrompt(options: AiFixOptions): string {
     ``,
     `Rules:`,
     `1. If a setting was RENAMED or REMOVED in FormatSettings, update the mapping in \`src/format_text.rs\` (and remove/rename the corresponding plugin config in the other files if it no longer exists upstream).`,
-    `2. If a setting was ADDED in FormatSettings, expose it as a new plugin config option across ALL of: \`configuration.rs\`, \`resolve_config.rs\`, \`format_text.rs\`, \`deployment/schema.json\`, and \`README.md\`. Match the existing naming conventions (Rust snake_case fields, camelCase dprint keys).`,
-    `3. Preserve the existing code style. Keep non-test code above test modules. New comments start lowercase unless multiple sentences.`,
-    `4. When done, BOTH of these must pass (CI denies clippy warnings, so a clippy warning is a hard failure) — iterate until both are clean:`,
+    `2. If a setting was ADDED in FormatSettings, expose it as a new plugin config option across ALL of: \`configuration.rs\`, \`resolve_config.rs\`, \`format_text.rs\`, and \`deployment/schema.json\`. Match the existing naming conventions (Rust snake_case fields, camelCase dprint keys).`,
+    `3. Do NOT edit \`README.md\`. Its config documentation is maintained separately, so leave it untouched.`,
+    `4. Preserve the existing code style. Keep non-test code above test modules. New comments start lowercase unless multiple sentences.`,
+    `5. When done, ALL of these must pass (CI denies clippy warnings, and the wasm build is what actually ships) — iterate until they are all clean:`,
     `     cargo test`,
     `     cargo clippy --all-targets --all-features -- -D warnings`,
-    `5. Do not change the plugin's own version in Cargo.toml, do not run git commit, and do not push.`,
+    `     cargo build --target wasm32-unknown-unknown --features wasm --release`,
+    `6. Do not change the plugin's own version in Cargo.toml, do not run git commit, and do not push.`,
   ].join("\n");
 }
 
@@ -142,7 +144,6 @@ function describeWiring(): string {
     `- \`src/configuration/configuration.rs\` -> the plugin's own \`Configuration\` struct and enums.`,
     `- \`src/configuration/resolve_config.rs\` -> reads each dprint config key (camelCase) into \`Configuration\`.`,
     `- \`deployment/schema.json\` -> the JSON schema of config options shown to users.`,
-    `- \`README.md\` -> documents each config option.`,
   ].join("\n");
 }
 
@@ -221,8 +222,9 @@ function buildReviewPrompt(options: AiFixOptions): string {
     ``,
     `Verify specifically:`,
     `- Every field assigned in \`build_format_settings\` still exists in mago-formatter's \`FormatSettings\` with that exact name (catch removed/renamed fields).`,
-    `- Any FormatSettings field newly added upstream is exposed through ALL layers: configuration.rs, resolve_config.rs, format_text.rs, deployment/schema.json, and README.md. A partial addition is a blocking issue.`,
-    `- Naming conventions are consistent (Rust snake_case fields, camelCase dprint keys, matching schema/README).`,
+    `- Any FormatSettings field newly added upstream is exposed through ALL layers: configuration.rs, resolve_config.rs, format_text.rs, and deployment/schema.json. A partial addition is a blocking issue.`,
+    `- Naming conventions are consistent (Rust snake_case fields, camelCase dprint keys, matching the schema).`,
+    `- README.md was NOT modified (its documentation is maintained separately); flag any README.md change as a blocking issue.`,
     `- No obvious correctness bugs, and code style matches the surrounding code.`,
     ``,
     `When done, your FINAL message must be ONLY a JSON object (no markdown code fences, no extra prose) of exactly this shape:`,

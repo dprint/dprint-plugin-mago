@@ -15,6 +15,11 @@ const buildJob = {
     },
     { uses: "denoland/setup-deno@v2" },
     { uses: "dsherret/rust-toolchain-file@v1" },
+    // the update script builds the wasm release as one of its checks.
+    {
+      name: "Install wasm32 target",
+      run: "rustup target add wasm32-unknown-unknown",
+    },
     // node is needed so the update script can install and run the OpenAI
     // Codex CLI (@openai/codex) when it has to reconcile a Mago update.
     { uses: "actions/setup-node@v6", with: { "node-version": "24.x" } },
