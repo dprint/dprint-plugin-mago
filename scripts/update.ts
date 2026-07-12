@@ -113,7 +113,7 @@ await $`git push origin ${newVersion}`;
 // AI.
 async function runChecks(): Promise<{ passed: boolean; output: string }> {
   const results = [];
-  for (const command of CHECK_COMMANDS) {
+  for (const command of checkCommands()) {
     results.push(await capture(command()));
   }
   const failures = results.filter((r) => r.code !== 0);
@@ -134,16 +134,20 @@ function capture(command: ReturnType<typeof $>) {
 // same checks as `runChecks`, but throws on the first failure so the workflow
 // aborts before anything is committed, tagged, or published.
 async function assertChecks(): Promise<void> {
-  for (const command of CHECK_COMMANDS) {
+  for (const command of checkCommands()) {
     await command();
   }
 }
 
-const CHECK_COMMANDS = [
-  () => $`cargo test`,
-  () => $`cargo clippy --all-targets --all-features -- -D warnings`,
-  () => $`cargo build --target wasm32-unknown-unknown --features wasm --release`,
-];
+// a function (not a top-level const) so it is hoisted -- `runChecks` is called
+// from top-level code above before a const declared here would be initialized.
+function checkCommands() {
+  return [
+    () => $`cargo test`,
+    () => $`cargo clippy --all-targets --all-features -- -D warnings`,
+    () => $`cargo build --target wasm32-unknown-unknown --features wasm --release`,
+  ];
+}
 
 interface MagoVersions {
   formatter: string;
