@@ -28,8 +28,8 @@ export interface AiFixOptions {
   fromVersion: string;
   /** Mago version being upgraded to. */
   toVersion: string;
-  /** Whether `cargo test` already passed with the version bump applied. */
-  testsPassed: boolean;
+  /** Whether the checks (test + clippy) already passed with the bump applied. */
+  checksPassed: boolean;
 }
 
 /** Max number of times the reviewer may send changes back to Codex. */
@@ -77,20 +77,20 @@ async function runCodex(prompt: string): Promise<void> {
 }
 
 function buildFixPrompt(options: AiFixOptions): string {
-  const { isPatchBump, fromVersion, toVersion, testsPassed } = options;
+  const { isPatchBump, fromVersion, toVersion, checksPassed } = options;
 
-  const situation = testsPassed
+  const situation = checksPassed
     ? `Mago was upgraded from ${fromVersion} to ${toVersion} (a ${
       isPatchBump ? "patch" : "minor"
-    } bump). The project already compiles and \`cargo test\` passes, but a new Mago version may have ADDED, RENAMED, or REMOVED formatting settings that should be surfaced by this plugin.`
-    : `Mago was upgraded from ${fromVersion} to ${toVersion} and the project no longer builds or \`cargo test\` fails. This is almost always because Mago's public API (usually its \`FormatSettings\` struct or related enums) changed.`;
+    } bump). The project already compiles and the checks pass, but a new Mago version may have ADDED, RENAMED, or REMOVED formatting settings that should be surfaced by this plugin.`
+    : `Mago was upgraded from ${fromVersion} to ${toVersion} and the checks fail (the project no longer builds, or \`cargo test\` or \`cargo clippy\` fails). This is almost always because Mago's public API (usually its \`FormatSettings\` struct or related enums) changed.`;
 
   return [
     `You are updating the "dprint-plugin-mago" Rust crate, a dprint plugin that wraps the \`mago-formatter\` crate to format PHP.`,
     ``,
     situation,
     ``,
-    `Your goal: make \`cargo test\` pass AND keep this plugin's configuration surface in sync with mago-formatter's \`FormatSettings\`. Do NOT commit or push; only edit files in the working tree.`,
+    `Your goal: make the checks pass AND keep this plugin's configuration surface in sync with mago-formatter's \`FormatSettings\`. Do NOT commit or push; only edit files in the working tree.`,
     ``,
     describeWiring(),
     ``,
@@ -102,7 +102,9 @@ function buildFixPrompt(options: AiFixOptions): string {
     `1. If a setting was RENAMED or REMOVED in FormatSettings, update the mapping in \`src/format_text.rs\` (and remove/rename the corresponding plugin config in the other files if it no longer exists upstream).`,
     `2. If a setting was ADDED in FormatSettings, expose it as a new plugin config option across ALL of: \`configuration.rs\`, \`resolve_config.rs\`, \`format_text.rs\`, \`deployment/schema.json\`, and \`README.md\`. Match the existing naming conventions (Rust snake_case fields, camelCase dprint keys).`,
     `3. Preserve the existing code style. Keep non-test code above test modules. New comments start lowercase unless multiple sentences.`,
-    `4. When done, run \`cargo test\` and ensure it passes. Iterate until it does.`,
+    `4. When done, BOTH of these must pass (CI denies clippy warnings, so a clippy warning is a hard failure) — iterate until both are clean:`,
+    `     cargo test`,
+    `     cargo clippy --all-targets --all-features -- -D warnings`,
     `5. Do not change the plugin's own version in Cargo.toml, do not run git commit, and do not push.`,
   ].join("\n");
 }
