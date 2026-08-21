@@ -198,14 +198,14 @@ checksum = "56254986775e3233ffa9c4d7d3faaf6d36a2c09d30b20687e9f88bc8bafc16c8"
 
 [[package]]
 name = "dprint-core"
-version = "0.67.4"
+version = "0.69.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c1d827947704a9495f705d6aeed270fa21a67f825f22902c28f38dc3af7a9ae"
+checksum = "7554bfc77a03c35c5581d5f390b7f102c501e37841f7f43d29dd54a0b3c2284d"
 dependencies = [
- "anyhow",
  "indexmap",
  "serde",
  "serde_json",
+ "thiserror",
 ]
 
 [[package]]
@@ -223,7 +223,7 @@ dependencies = [
 
 [[package]]
 name = "dprint-plugin-mago"
-version = "0.25.0"
+version = "0.25.1"
 dependencies = [
  "anyhow",
  "dprint-core",
@@ -234,6 +234,7 @@ dependencies = [
  "pretty_assertions",
  "serde",
  "serde_json",
+ "thiserror",
 ]
 
 [[package]]
