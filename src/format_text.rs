@@ -1,7 +1,6 @@
 use std::borrow::Cow;
 use std::path::Path;
 
-use anyhow::Result;
 use mago_allocator::LocalArena;
 use mago_formatter::Formatter;
 use mago_formatter::settings::BraceStyle;
@@ -14,7 +13,18 @@ use mago_php_version::PHPVersion;
 
 use crate::configuration::Configuration;
 
-pub fn format_text(file_path: &Path, input_text: &str, config: &Configuration) -> Result<Option<String>> {
+/// Error that occurred while formatting PHP text.
+#[derive(Debug, thiserror::Error)]
+pub enum FormatError {
+  /// The text could not be parsed as PHP.
+  #[error(transparent)]
+  Parse(Box<dyn std::error::Error + Send + Sync + 'static>),
+  /// The formatted output was not valid UTF-8.
+  #[error(transparent)]
+  Utf8(#[from] std::str::Utf8Error),
+}
+
+pub fn format_text(file_path: &Path, input_text: &str, config: &Configuration) -> Result<Option<String>, FormatError> {
   let lower_ext = file_path
     .extension()
     .and_then(|ext| ext.to_str())
@@ -38,7 +48,9 @@ pub fn format_text(file_path: &Path, input_text: &str, config: &Configuration) -
   // so the runtime inputs are converted to owned Vec<u8>.
   let file_name = file_path.to_string_lossy().into_owned().into_bytes();
   let code = input_text.as_bytes().to_vec();
-  let formatted = formatter.format_code(Cow::Owned(file_name), Cow::Owned(code))?;
+  let formatted = formatter
+    .format_code(Cow::Owned(file_name), Cow::Owned(code))
+    .map_err(|err| FormatError::Parse(Box::new(err)))?;
   let formatted = std::str::from_utf8(formatted)?;
 
   if formatted == input_text {
