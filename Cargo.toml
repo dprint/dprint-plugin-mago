@@ -24,7 +24,7 @@ panic = "abort"
 wasm = ["serde_json", "dprint-core/wasm"]
 
 [dependencies]
-dprint-core = { version = "0.69.0", default-features = false }
+dprint-core = { version = "0.69.1", default-features = false }
 mago-allocator = "1.43.0"
 mago-formatter = "1.47.2"
 mago-php-version = "1.47.2"
