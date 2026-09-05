@@ -1,6 +1,6 @@
 # dprint-plugin-mago
 
-[![CI](https://github.com/dprint/dprint-plugin-mago/workflows/CI/badge.svg)](https://github.com/dprint/dprint-plugin-mago/actions?query=workflow%3ACI)
+[![npm version](https://img.shields.io/npm/v/@dprint/mago.svg)](https://www.npmjs.com/package/@dprint/mago) [![CI](https://github.com/dprint/dprint-plugin-mago/workflows/CI/badge.svg)](https://github.com/dprint/dprint-plugin-mago/actions?query=workflow%3ACI)
 
 Adapter for [Mago](https://github.com/carthage-software/mago) for use as a formatting plugin in [dprint](https://github.com/dprint/dprint).
 
