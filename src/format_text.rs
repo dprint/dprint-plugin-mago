@@ -201,6 +201,9 @@ fn build_format_settings(config: &Configuration) -> FormatSettings {
   if let Some(v) = config.preserve_breaking_binary_expression {
     settings.preserve_breaking_binary_expression = v;
   }
+  if let Some(v) = config.preserve_breaking_pipe_expression {
+    settings.preserve_breaking_pipe_expression = v;
+  }
 
   // Operator and structural settings
   if let Some(v) = config.break_promoted_properties_list {

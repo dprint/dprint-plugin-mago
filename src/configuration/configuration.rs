@@ -165,6 +165,7 @@ pub struct Configuration {
   pub preserve_breaking_conditional_expression: Option<bool>,
   pub preserve_breaking_condition_expression: Option<bool>,
   pub preserve_breaking_binary_expression: Option<bool>,
+  pub preserve_breaking_pipe_expression: Option<bool>,
 
   // Operator and structural settings
   pub break_promoted_properties_list: Option<bool>,

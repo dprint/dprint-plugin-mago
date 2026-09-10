@@ -1,0 +1,13 @@
+~~ preserveBreakingPipeExpression: true ~~
+== should preserve breaking pipe expressions ==
+<?php
+$value = $input
+    |> trim(...)
+    |> strtoupper(...);
+
+[expect]
+<?php
+
+$value = $input
+    |> trim(...)
+    |> strtoupper(...);

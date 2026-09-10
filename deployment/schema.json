@@ -234,6 +234,11 @@
       "default": false,
       "type": "boolean"
     },
+    "preserveBreakingPipeExpression": {
+      "description": "Preserve existing line breaks in pipe expressions.",
+      "default": false,
+      "type": "boolean"
+    },
     "breakPromotedPropertiesList": {
       "description": "Always break parameter lists with promoted properties.",
       "default": true,

@@ -126,6 +126,11 @@ pub fn resolve_config(
       "preserveBreakingBinaryExpression",
       &mut diagnostics,
     ),
+    preserve_breaking_pipe_expression: get_nullable_value(
+      &mut config,
+      "preserveBreakingPipeExpression",
+      &mut diagnostics,
+    ),
     preserve_breaking_attribute_list: get_nullable_value(
       &mut config,
       "preserveBreakingAttributeList",
