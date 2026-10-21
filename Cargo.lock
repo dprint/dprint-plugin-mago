@@ -223,7 +223,7 @@ dependencies = [
 
 [[package]]
 name = "dprint-plugin-mago"
-version = "0.35.0"
+version = "0.36.0"
 dependencies = [
  "anyhow",
  "dprint-core",
