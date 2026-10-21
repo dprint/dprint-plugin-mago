@@ -12,7 +12,8 @@ import { getBuffer } from "@dprint/mago";
 
 const formatter = createFromBuffer(getBuffer());
 
-console.log(
-  formatter.formatText("test.php", "<?php\necho   '1'"),
-);
+console.log(formatter.formatText({
+  filePath: "test.php",
+  fileText: "<?php\necho   '1'",
+}));
 ```
