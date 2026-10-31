@@ -31,6 +31,7 @@ impl SyncPluginHandler<Configuration> for MagoPluginHandler {
       file_matching: FileMatchingInfo {
         file_extensions,
         file_names: vec![],
+        additive: false,
       },
     }
   }
