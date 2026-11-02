@@ -57,3 +57,57 @@ fn should_return_none_for_non_php_files() {
   let result = format_text(&PathBuf::from("./file.js"), "const x = 1;", &config).unwrap();
   assert!(result.is_none());
 }
+
+#[test]
+fn should_format_range_in_statement() {
+  let text = "<?php\n\n$a=1;\n$b   =   2;\n$c=3;\n";
+  let start = text.find("=   2").unwrap();
+  let result = format_php_range(text, start..start + 1);
+  assert_eq!(result.unwrap(), "<?php\n\n$a=1;\n$b = 2;\n$c=3;\n");
+}
+
+#[test]
+fn should_format_range_in_class_member() {
+  let text =
+    "<?php\n\nclass A\n{\n    public function a(){return 1;}\n\n    public function   b( $x ){return $x;}\n}\n";
+  // in the method's signature, so the whole method is the smallest enclosing member
+  let start = text.find("b( $x )").unwrap();
+  let result = format_php_range(text, start..start + 7);
+  assert_eq!(
+    result.unwrap(),
+    "<?php\n\nclass A\n{\n    public function a(){return 1;}\n\n    public function b($x)\n    {\n        return $x;\n    }\n}\n"
+  );
+}
+
+#[test]
+fn should_return_none_for_formatted_range() {
+  let text = "<?php\n\n$a=1;\n$b = 2;\n$c=3;\n";
+  let start = text.find("$b").unwrap();
+  let result = format_php_range(text, start..start + 7);
+  assert!(result.is_none());
+}
+
+#[test]
+fn should_format_range_after_multi_byte_chars() {
+  let text = "<?php\n\n$a='héllo 😀';\n$b   =   'wörld';\n$c=3;\n";
+  let start = text.find("$b").unwrap();
+  let end = text.find("$c").unwrap();
+  let result = format_php_range(text, start..end);
+  assert_eq!(result.unwrap(), "<?php\n\n$a='héllo 😀';\n$b = 'wörld';\n$c=3;\n");
+}
+
+#[test]
+fn should_return_none_for_range_in_non_php_files() {
+  let result = format_text_range(
+    &PathBuf::from("./file.js"),
+    "const x=1;",
+    0..10,
+    &Configuration::default(),
+  )
+  .unwrap();
+  assert!(result.is_none());
+}
+
+fn format_php_range(text: &str, range: std::ops::Range<usize>) -> Option<String> {
+  format_text_range(&PathBuf::from("./file.php"), text, range, &Configuration::default()).unwrap()
+}

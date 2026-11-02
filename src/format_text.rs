@@ -1,7 +1,9 @@
 use std::borrow::Cow;
+use std::ops::Range;
 use std::path::Path;
 
 use mago_allocator::LocalArena;
+use mago_database::file::File;
 use mago_formatter::Formatter;
 use mago_formatter::settings::BraceStyle;
 use mago_formatter::settings::EndOfLine;
@@ -25,24 +27,13 @@ pub enum FormatError {
 }
 
 pub fn format_text(file_path: &Path, input_text: &str, config: &Configuration) -> Result<Option<String>, FormatError> {
-  let lower_ext = file_path
-    .extension()
-    .and_then(|ext| ext.to_str())
-    .map(|s| s.to_lowercase());
-
   // Only handle PHP files
-  if !matches!(lower_ext.as_deref(), Some("php")) {
+  if !is_php_file(file_path) {
     return Ok(None);
   }
 
   let arena = LocalArena::new();
-  let php_version = PHPVersion::new(
-    config.php_version_major.unwrap_or(8) as u32,
-    config.php_version_minor.unwrap_or(4) as u32,
-    0,
-  );
-  let settings = build_format_settings(config);
-  let formatter = Formatter::new(&arena, php_version, settings);
+  let formatter = build_formatter(&arena, config);
 
   // mago_formatter::Formatter::format_code requires Cow<'static, [u8]>,
   // so the runtime inputs are converted to owned Vec<u8>.
@@ -58,6 +49,68 @@ pub fn format_text(file_path: &Path, input_text: &str, config: &Configuration) -
   } else {
     Ok(Some(formatted.to_string()))
   }
+}
+
+/// Formats the smallest statement or class member enclosing the provided byte range,
+/// leaving the rest of the text as it was.
+///
+/// Use statements expand to their whole group. Returns `None` when there's nothing to
+/// change, such as when the range is already formatted, only covers inline HTML, or
+/// is in an ignored region.
+pub fn format_text_range(
+  file_path: &Path,
+  input_text: &str,
+  range: Range<usize>,
+  config: &Configuration,
+) -> Result<Option<String>, FormatError> {
+  if !is_php_file(file_path) {
+    return Ok(None);
+  }
+  // mago works with u32 offsets, so a range past that can't be in the file
+  let (Ok(start), Ok(end)) = (u32::try_from(range.start), u32::try_from(range.end)) else {
+    return Ok(None);
+  };
+
+  let arena = LocalArena::new();
+  let formatter = build_formatter(&arena, config);
+
+  // File requires Cow<'static, [u8]>, so the runtime inputs are converted to owned Vec<u8>
+  let file_name = file_path.to_string_lossy().into_owned().into_bytes();
+  let code = input_text.as_bytes().to_vec();
+  let file = File::ephemeral(Cow::Owned(file_name), Cow::Owned(code));
+  let Some(formatted) = formatter
+    .format_range(&file, start..end)
+    .map_err(|err| FormatError::Parse(Box::new(err)))?
+  else {
+    return Ok(None);
+  };
+
+  // splice the formatted text into the original text in place of the source it replaces
+  let input_bytes = input_text.as_bytes();
+  let replaced = formatted.range.start as usize..formatted.range.end as usize;
+  let mut output = Vec::with_capacity(input_bytes.len() - replaced.len() + formatted.new_text.len());
+  output.extend_from_slice(&input_bytes[..replaced.start]);
+  output.extend_from_slice(formatted.new_text);
+  output.extend_from_slice(&input_bytes[replaced.end..]);
+  let output = String::from_utf8(output).map_err(|err| err.utf8_error())?;
+  Ok(Some(output))
+}
+
+fn is_php_file(file_path: &Path) -> bool {
+  file_path
+    .extension()
+    .and_then(|ext| ext.to_str())
+    .is_some_and(|ext| ext.eq_ignore_ascii_case("php"))
+}
+
+fn build_formatter<'arena>(arena: &'arena LocalArena, config: &Configuration) -> Formatter<'arena, LocalArena> {
+  let php_version = PHPVersion::new(
+    config.php_version_major.unwrap_or(8) as u32,
+    config.php_version_minor.unwrap_or(4) as u32,
+    0,
+  );
+  let settings = build_format_settings(config);
+  Formatter::new(arena, php_version, settings)
 }
 
 fn build_format_settings(config: &Configuration) -> FormatSettings {

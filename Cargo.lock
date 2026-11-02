@@ -229,6 +229,7 @@ dependencies = [
  "dprint-core",
  "dprint-development",
  "mago-allocator",
+ "mago-database",
  "mago-formatter",
  "mago-php-version",
  "pretty_assertions",

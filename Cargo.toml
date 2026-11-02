@@ -26,6 +26,7 @@ wasm = ["serde_json", "dprint-core/wasm"]
 [dependencies]
 dprint-core = { version = "0.75.0", default-features = false }
 mago-allocator = "1.43.0"
+mago-database = "1.59.0"
 mago-formatter = "1.59.0"
 mago-php-version = "1.59.0"
 serde = { version = "1.0.210", features = ["derive"] }
