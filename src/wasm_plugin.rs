@@ -52,6 +52,7 @@ impl SyncPluginHandler<Configuration> for MagoPluginHandler {
         version
       ),
       update_url: Some("https://plugins.dprint.dev/dprint/dprint-plugin-mago/latest.json".to_string()),
+      supports_range_formatting: Some(false),
     }
   }
 
