@@ -2,6 +2,204 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://plugins.dprint.dev/dprint/dprint-plugin-mago/0.0.0/schema.json",
   "type": "object",
+  "x-playground": {
+    "input": [
+      "<?php",
+      "namespace App\\Billing;",
+      "use App\\Models\\Order;",
+      "use App\\Contracts\\Mailer;",
+      "use App\\Models\\Customer;",
+      "",
+      "final class InvoiceService {",
+      "    public function __construct(private Mailer $mailer, private float $taxRate = 0.2) {}",
+      "",
+      "    public function total(Order $order) : float {",
+      "        $subtotal=0;",
+      "        foreach($order->items() as $item){ $subtotal+=$item->price*$item->quantity; }",
+      "        return round($subtotal*(1+$this->taxRate),2);",
+      "    }",
+      "",
+      "    public function send(Customer $customer,Order $order):void",
+      "    {",
+      "        if(!$customer->email){return;}",
+      "        $message = \"Invoice #\".$order->id.\" total: \".$this->total($order);",
+      "        $this->mailer->send($customer->email,\"Your invoice\",$message);",
+      "    }",
+      "}"
+    ]
+  },
+  "x-sections": [
+    {
+      "title": "General",
+      "description": "The PHP version, width, and indentation of all the code.",
+      "properties": [
+        "phpVersionMajor",
+        "phpVersionMinor",
+        "printWidth",
+        "tabWidth",
+        "useTabs",
+        "endOfLine"
+      ]
+    },
+    {
+      "title": "PHP tags",
+      "description": "The opening `<?php` and closing `?>` tags.",
+      "properties": [
+        "openingTagOnOwnLine",
+        "emptyLineAfterOpeningTag",
+        "combineOpeningTagAndDeclare",
+        "removeTrailingCloseTag"
+      ]
+    },
+    {
+      "title": "Braces",
+      "description": "Where braces go and when empty bodies stay on one line.",
+      "properties": [
+        "controlBraceStyle",
+        "followingClauseOnNewline",
+        "closureBraceStyle",
+        "functionBraceStyle",
+        "methodBraceStyle",
+        "classlikeBraceStyle",
+        "inlineEmptyControlBraces",
+        "inlineEmptyClosureBraces",
+        "inlineEmptyFunctionBraces",
+        "inlineEmptyMethodBraces",
+        "inlineEmptyConstructorBraces",
+        "inlineEmptyClasslikeBraces",
+        "inlineEmptyAnonymousClassBraces",
+        "inlineAbstractPropertyHooks"
+      ]
+    },
+    {
+      "title": "Line breaks",
+      "description": "When lists and expressions break across lines, and which existing line breaks are kept.",
+      "properties": [
+        "trailingComma",
+        "preserveBreakingArgumentList",
+        "inlineSingleBreakingValueArgument",
+        "preserveBreakingArrayLike",
+        "preserveBreakingParameterList",
+        "preserveBreakingAttributeList",
+        "preserveBreakingConditionalExpression",
+        "preserveBreakingConditionExpression",
+        "preserveBreakingBinaryExpression",
+        "preserveBreakingPipeExpression",
+        "breakPromotedPropertiesList",
+        "parameterAttributeOnNewLine",
+        "lineBeforeBinaryOperator",
+        "indentBinaryExpressionContinuation",
+        "alwaysBreakNamedArgumentsList",
+        "alwaysBreakAttributeNamedArgumentLists"
+      ]
+    },
+    {
+      "title": "Method chains",
+      "description": "How chains of method calls break across lines.",
+      "properties": [
+        "methodChainBreakingStyle",
+        "firstMethodChainOnNewLine",
+        "methodChainSemicolonOnNextLine",
+        "preserveBreakingMemberAccessChain",
+        "preserveBreakingMemberAccessChainFirstMethodOnSameLine"
+      ]
+    },
+    {
+      "title": "Alignment",
+      "description": "Aligning arguments, parameters, arrays, and assignments in columns.",
+      "properties": [
+        "alignNamedArguments",
+        "alignParameters",
+        "arrayTableStyleAlignment",
+        "alignAssignmentLike"
+      ]
+    },
+    {
+      "title": "Blank lines",
+      "description": "The empty lines between statements and class members.",
+      "properties": [
+        "emptyLineAfterControlStructure",
+        "emptyLineAfterDeclare",
+        "emptyLineAfterNamespace",
+        "emptyLineAfterUse",
+        "emptyLineAfterSymbols",
+        "emptyLineBetweenSameSymbols",
+        "emptyLineAfterClassLikeConstant",
+        "emptyLineAfterClassLikeOpen",
+        "emptyLineBeforeClassLikeClose",
+        "emptyLineAfterEnumCase",
+        "emptyLineAfterTraitUse",
+        "emptyLineAfterProperty",
+        "emptyLineAfterMethod",
+        "emptyLineBeforeReturn",
+        "emptyLineBeforeDanglingComments",
+        "separateClassLikeMembers"
+      ]
+    },
+    {
+      "title": "Spaces",
+      "description": "The spaces around operators and before parentheses.",
+      "properties": [
+        "spaceBeforeArrowFunctionParameterListParenthesis",
+        "spaceBeforeClosureParameterListParenthesis",
+        "spaceBeforeHookParameterListParenthesis",
+        "spaceBeforeClosureUseClauseParenthesis",
+        "spaceAfterCastUnaryPrefixOperators",
+        "spaceAfterReferenceUnaryPrefixOperator",
+        "spaceAfterErrorControlUnaryPrefixOperator",
+        "spaceAfterLogicalNotUnaryPrefixOperator",
+        "spaceAfterBitwiseNotUnaryPrefixOperator",
+        "spaceAfterIncrementUnaryPrefixOperator",
+        "spaceAfterDecrementUnaryPrefixOperator",
+        "spaceAfterAdditiveUnaryPrefixOperator",
+        "spaceAroundConcatenationBinaryOperator",
+        "spaceAroundAssignmentInDeclare",
+        "spaceWithinGroupingParenthesis"
+      ]
+    },
+    {
+      "title": "Parentheses",
+      "description": "Which parentheses are added or removed.",
+      "properties": [
+        "omitRedundantArithmeticBinaryExpressionParentheses",
+        "omitRedundantBitwiseBinaryExpressionParentheses",
+        "preserveRedundantLogicalBinaryExpressionParentheses",
+        "parenthesesAroundNewInMemberAccess",
+        "parenthesesInNewExpression",
+        "parenthesesInExitAndDie",
+        "parenthesesInAttribute"
+      ]
+    },
+    {
+      "title": "Literals and types",
+      "description": "Quotes, keyword casing, nullable types, and heredocs.",
+      "properties": [
+        "singleQuote",
+        "uppercaseLiteralKeyword",
+        "nullTypeHint",
+        "indentHeredoc"
+      ]
+    },
+    {
+      "title": "Use statements",
+      "description": "The sorting and grouping of `use` statements.",
+      "properties": [
+        "sortUses",
+        "separateUseTypes",
+        "expandUseGroups"
+      ]
+    },
+    {
+      "title": "Classes and attributes",
+      "description": "The order of class methods and attributes, and splitting trait uses and attribute groups.",
+      "properties": [
+        "sortClassMethods",
+        "separateTraitUse",
+        "attributesOrder",
+        "separateAttributes"
+      ]
+    }
+  ],
   "definitions": {
     "braceStyle": {
       "description": "Brace placement style.",
@@ -11,10 +209,10 @@
         "description": "Opening brace on the same line."
       }, {
         "const": "next-line",
-        "description": "Opening brace on the next line."
+        "description": "Opening brace on the next line, unless the parameter list breaks across multiple lines."
       }, {
         "const": "always-next-line",
-        "description": "Opening brace always on the next line."
+        "description": "Opening brace on the next line, even after a parameter list that breaks across multiple lines."
       }]
     },
     "sortOrder": {
@@ -42,27 +240,45 @@
     "phpVersionMajor": {
       "description": "PHP major version for parsing.",
       "default": 8,
-      "type": "number"
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
     },
     "phpVersionMinor": {
       "description": "PHP minor version for parsing.",
       "default": 4,
-      "type": "number"
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
     },
     "printWidth": {
       "description": "Maximum line length before wrapping occurs.",
       "default": 120,
-      "type": "number"
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535
     },
     "tabWidth": {
       "description": "Number of spaces per indentation level.",
       "default": 4,
-      "type": "number"
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
     },
     "useTabs": {
       "description": "Use tabs instead of spaces for indentation.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "function greet(string $name): string",
+          "{",
+          "    return 'Hello ' . $name;",
+          "}"
+        ]
+      }
     },
     "endOfLine": {
       "description": "End-of-line character sequence.",
@@ -85,82 +301,251 @@
     "singleQuote": {
       "description": "Prefer single quotes over double quotes.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$greeting = \"Hello\";",
+          "$name = 'World';",
+          "$message = \"It's {$name}\";"
+        ]
+      }
     },
     "trailingComma": {
       "description": "Add trailing comma to multi-line structures.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$colors = [",
+          "    'red',",
+          "    'green',",
+          "    'blue'",
+          "];"
+        ]
+      }
     },
     "removeTrailingCloseTag": {
-      "description": "Remove closing ?> tags from files.",
+      "description": "Remove the closing `?>` tag at the end of files.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "echo 'Hello';",
+          "?>"
+        ]
+      }
     },
     "controlBraceStyle": {
-      "description": "Brace placement for control structures (if/for/while).",
+      "description": "Brace placement for control structures (`if`, `for`, `while`, `match`, etc.). With `next-line`, a `match` that fits on one line stays on one line.",
       "default": "same-line",
-      "$ref": "#/definitions/braceStyle"
+      "$ref": "#/definitions/braceStyle",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "if ($user->isAdmin()) {",
+          "    grantAccess($user);",
+          "}",
+          "",
+          "$label = match ($status) { 'paid' => 'Paid' };"
+        ]
+      }
     },
     "followingClauseOnNewline": {
-      "description": "Place else, elseif, catch, and finally clauses on a new line.",
+      "description": "Place `else`, `elseif`, `catch`, and `finally` clauses on a new line.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "if ($stock > 0) {",
+          "    sell();",
+          "} else {",
+          "    restock();",
+          "}"
+        ]
+      }
     },
     "closureBraceStyle": {
       "description": "Brace placement for closures.",
       "default": "same-line",
-      "$ref": "#/definitions/braceStyle"
+      "$ref": "#/definitions/braceStyle",
+      "x-example": {
+        "config": {
+          "printWidth": 60
+        },
+        "input": [
+          "<?php",
+          "",
+          "$double = function (int $value): int {",
+          "    return $value * 2;",
+          "};",
+          "",
+          "$format = function (string $firstName, string $lastName) use ($separator): string {",
+          "    return $firstName . $separator . $lastName;",
+          "};"
+        ]
+      }
     },
     "functionBraceStyle": {
       "description": "Brace placement for functions.",
       "default": "next-line",
-      "$ref": "#/definitions/braceStyle"
+      "$ref": "#/definitions/braceStyle",
+      "x-example": {
+        "config": {
+          "printWidth": 60
+        },
+        "input": [
+          "<?php",
+          "",
+          "function add(int $a, int $b): int {",
+          "    return $a + $b;",
+          "}",
+          "",
+          "function createInvoice(Customer $customer, array $lineItems, string $currency): Invoice {",
+          "    return new Invoice($customer, $lineItems, $currency);",
+          "}"
+        ]
+      }
     },
     "methodBraceStyle": {
       "description": "Brace placement for methods.",
       "default": "next-line",
-      "$ref": "#/definitions/braceStyle"
+      "$ref": "#/definitions/braceStyle",
+      "x-example": {
+        "config": {
+          "printWidth": 60
+        },
+        "input": [
+          "<?php",
+          "",
+          "class Cart",
+          "{",
+          "    public function total(): int {",
+          "        return $this->total;",
+          "    }",
+          "",
+          "    public function addProduct(Product $product, int $quantity, bool $notify): void {",
+          "        $this->items[] = $product;",
+          "    }",
+          "}"
+        ]
+      }
     },
     "classlikeBraceStyle": {
-      "description": "Brace placement for classes, interfaces, and traits.",
+      "description": "Brace placement for classes, interfaces, traits, and enums. `next-line` and `always-next-line` are the same here.",
       "default": "always-next-line",
       "$ref": "#/definitions/braceStyle"
     },
     "inlineEmptyControlBraces": {
       "description": "Place empty control structure bodies on same line.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "while ($queue->pop()) {",
+          "}"
+        ]
+      }
     },
     "inlineEmptyClosureBraces": {
       "description": "Place empty closure bodies on same line.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$noop = function () {",
+          "};"
+        ]
+      }
     },
     "inlineEmptyFunctionBraces": {
       "description": "Place empty function bodies on same line.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "function noop(): void",
+          "{",
+          "}"
+        ]
+      }
     },
     "inlineEmptyMethodBraces": {
       "description": "Place empty method bodies on same line.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class Logger",
+          "{",
+          "    public function flush(): void",
+          "    {",
+          "    }",
+          "}"
+        ]
+      }
     },
     "inlineEmptyConstructorBraces": {
       "description": "Place empty constructor bodies on same line.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class Point",
+          "{",
+          "    public function __construct(",
+          "        public int $x,",
+          "        public int $y,",
+          "    ) {",
+          "    }",
+          "}"
+        ]
+      }
     },
     "inlineEmptyClasslikeBraces": {
       "description": "Place empty class bodies on same line.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class NotFoundException extends Exception",
+          "{",
+          "}"
+        ]
+      }
     },
     "inlineEmptyAnonymousClassBraces": {
       "description": "Place empty anonymous class bodies on same line.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$handler = new class implements Handler {",
+          "};"
+        ]
+      }
     },
     "methodChainBreakingStyle": {
       "description": "How to break method chains across lines.",
@@ -172,162 +557,470 @@
       }, {
         "const": "next-line",
         "description": "Break chained methods to new lines."
-      }]
+      }],
+      "x-example": {
+        "config": {
+          "printWidth": 60,
+          "firstMethodChainOnNewLine": false
+        },
+        "input": [
+          "<?php",
+          "",
+          "$users = $query->where('active', true)->orderBy('name')->limit(10)->get();"
+        ]
+      }
     },
     "firstMethodChainOnNewLine": {
       "description": "Place first method call on new line when chaining.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "config": {
+          "printWidth": 60,
+          "methodChainBreakingStyle": "same-line"
+        },
+        "input": [
+          "<?php",
+          "",
+          "$users = $query->where('active', true)->orderBy('name')->limit(10)->get();"
+        ]
+      }
     },
     "methodChainSemicolonOnNextLine": {
-      "description": "Place a method chain's semicolon on a new line.",
+      "description": "Place a broken method chain's semicolon on its own line.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "config": {
+          "printWidth": 60
+        },
+        "input": [
+          "<?php",
+          "",
+          "$users = $query->where('active', true)->orderBy('name')->limit(10)->get();"
+        ]
+      }
     },
     "preserveBreakingMemberAccessChain": {
       "description": "Preserve existing line breaks in method chains.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$names = $users",
+          "    ->filter(fn($user) => $user->active)",
+          "    ->map(fn($user) => $user->name);"
+        ]
+      }
     },
     "preserveBreakingMemberAccessChainFirstMethodOnSameLine": {
-      "description": "Keep the first method call on the same line in preserved member access chains.",
+      "description": "Keep the first method call on the same line as the receiver in method chains kept broken by `preserveBreakingMemberAccessChain`.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "config": {
+          "preserveBreakingMemberAccessChain": true
+        },
+        "input": [
+          "<?php",
+          "",
+          "$names = $users",
+          "    ->filter(fn($user) => $user->active)",
+          "    ->map(fn($user) => $user->name);"
+        ]
+      }
     },
     "preserveBreakingArgumentList": {
       "description": "Preserve existing line breaks in argument lists.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$user = createUser(",
+          "    'Alice',",
+          "    'alice@example.com',",
+          ");"
+        ]
+      }
     },
     "inlineSingleBreakingValueArgument": {
-      "description": "Inline a single value argument in a breaking argument list.",
+      "description": "Keep a call's only argument on the same line when it's a value (ex. a string) and the line is too long, instead of breaking the parentheses.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "config": {
+          "printWidth": 60
+        },
+        "input": [
+          "<?php",
+          "",
+          "$command->setDescription('Sends a reminder to every customer with an unpaid invoice');"
+        ]
+      }
     },
     "preserveBreakingArrayLike": {
       "description": "Preserve existing line breaks in array structures.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$point = [",
+          "    'x' => 1,",
+          "    'y' => 2,",
+          "];"
+        ]
+      }
     },
     "preserveBreakingParameterList": {
       "description": "Preserve existing line breaks in parameter lists.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "function move(",
+          "    int $x,",
+          "    int $y,",
+          "): void {}"
+        ]
+      }
     },
     "preserveBreakingAttributeList": {
       "description": "Preserve existing line breaks in attribute lists.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "#[",
+          "    Route('/users'),",
+          "    Middleware('auth'),",
+          "]",
+          "function listUsers(): void {}"
+        ]
+      }
     },
     "preserveBreakingConditionalExpression": {
       "description": "Preserve existing line breaks in ternary expressions.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$label = $count === 1",
+          "    ? 'item'",
+          "    : 'items';"
+        ]
+      }
     },
     "preserveBreakingConditionExpression": {
-      "description": "Preserve existing line breaks in condition expressions.",
+      "description": "Preserve existing line breaks in the conditions of `if`, `elseif`, `while`, `do`-`while`, `switch`, and `match`.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "if (",
+          "    $user->isActive()",
+          ") {",
+          "    notify($user);",
+          "}"
+        ]
+      }
     },
     "preserveBreakingBinaryExpression": {
       "description": "Preserve existing line breaks in binary expressions.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$total = $subtotal",
+          "    + $tax;"
+        ]
+      }
     },
     "preserveBreakingPipeExpression": {
-      "description": "Preserve existing line breaks in pipe expressions.",
+      "description": "Preserve existing line breaks in pipe (`|>`) expressions.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "config": {
+          "phpVersionMinor": 5
+        },
+        "input": [
+          "<?php",
+          "",
+          "$slug = $title",
+          "    |> trim(...)",
+          "    |> strtolower(...);"
+        ]
+      }
     },
     "breakPromotedPropertiesList": {
       "description": "Always break parameter lists with promoted properties.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class Point",
+          "{",
+          "    public function __construct(public int $x, public int $y) {}",
+          "}"
+        ]
+      }
     },
     "parameterAttributeOnNewLine": {
-      "description": "Place parameter attributes on a new line.",
+      "description": "Place parameter attributes on their own line when the parameter list breaks.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "config": {
+          "printWidth": 60
+        },
+        "input": [
+          "<?php",
+          "",
+          "function login(string $username, #[SensitiveParameter] string $password): bool {}"
+        ]
+      }
     },
     "lineBeforeBinaryOperator": {
       "description": "Place binary operator on next line when breaking.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "config": {
+          "printWidth": 60
+        },
+        "input": [
+          "<?php",
+          "",
+          "$isEligible = $customer->hasActiveSubscription() && !$customer->isSuspended();"
+        ]
+      }
     },
     "indentBinaryExpressionContinuation": {
-      "description": "Indent continued binary expressions.",
+      "description": "Indent the continuation lines of a broken binary expression in an assignment.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "config": {
+          "printWidth": 60
+        },
+        "input": [
+          "<?php",
+          "",
+          "$recipients = $this->notificationSettings->defaultRecipients ?? [];"
+        ]
+      }
     },
     "omitRedundantArithmeticBinaryExpressionParentheses": {
-      "description": "Omit redundant parentheses in arithmetic binary expressions.",
+      "description": "Omit redundant parentheses around arithmetic in comparisons and null coalescing (ex. `$a === ($b - 1)`).",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "if ($attempt === $retries - 1) {",
+          "    notify($admin);",
+          "}"
+        ]
+      }
     },
     "omitRedundantBitwiseBinaryExpressionParentheses": {
-      "description": "Omit redundant parentheses in bitwise binary expressions.",
+      "description": "Omit redundant parentheses around bitwise expressions within other bitwise expressions.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$flags = ($read & $write) | $execute;"
+        ]
+      }
     },
     "preserveRedundantLogicalBinaryExpressionParentheses": {
       "description": "Preserve redundant parentheses in logical binary expressions.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$canEdit = ($isOwner && $isActive) || $isAdmin;"
+        ]
+      }
     },
     "alwaysBreakNamedArgumentsList": {
       "description": "Always break named argument lists into multiple lines.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$user = createUser(name: 'Alice', admin: true);"
+        ]
+      }
     },
     "alwaysBreakAttributeNamedArgumentLists": {
-      "description": "Always break named argument lists in attributes.",
+      "description": "Also always break named argument lists in attributes. Only applies when `alwaysBreakNamedArgumentsList` is `true`.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "config": {
+          "alwaysBreakNamedArgumentsList": true
+        },
+        "input": [
+          "<?php",
+          "",
+          "#[Table(name: 'users', schema: 'public')]",
+          "class User {}"
+        ]
+      }
     },
     "alignNamedArguments": {
-      "description": "Align named arguments in columns.",
+      "description": "Align named arguments in columns in multi-line argument lists.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "config": {
+          "alwaysBreakNamedArgumentsList": true
+        },
+        "input": [
+          "<?php",
+          "",
+          "$user = createUser(name: 'Alice', email: 'alice@example.com', isAdministrator: true);"
+        ]
+      }
     },
     "alignParameters": {
-      "description": "Align parameters in columns.",
+      "description": "Align the variables of multi-line parameter lists in a column.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "config": {
+          "preserveBreakingParameterList": true
+        },
+        "input": [
+          "<?php",
+          "",
+          "function createUser(",
+          "    string $name,",
+          "    ?DateTimeImmutable $birthday,",
+          "    bool $admin,",
+          "): User {}"
+        ]
+      }
     },
     "arrayTableStyleAlignment": {
-      "description": "Use table-style alignment for arrays.",
+      "description": "Align the elements of arrays in a list of arrays in columns, like a table.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$products = [",
+          "    ['Keyboard', 49.99, 12],",
+          "    ['Mouse', 19.5, 140],",
+          "    ['Monitor', 229.0, 3],",
+          "];"
+        ]
+      }
     },
     "alignAssignmentLike": {
       "description": "Align consecutive assignment constructs in columns.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$id = 1;",
+          "$name = 'Alice';",
+          "$emailAddress = 'alice@example.com';"
+        ]
+      }
     },
     "sortUses": {
-      "description": "Sort use statements.",
+      "description": "Sort `use` statements.",
       "default": "alphanumeric-ascending",
       "oneOf": [{
         "$ref": "#/definitions/sortOrder"
       }, {
         "type": "boolean",
-        "description": "Legacy shorthand: true sorts ascending and false preserves order."
-      }]
+        "description": "Legacy shorthand: `true` is `alphanumeric-ascending` and `false` is `preserve`."
+      }],
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "use App\\Http\\Controllers\\Controller;",
+          "use App\\Models\\User;",
+          "use App\\Events\\OrderShipped;"
+        ]
+      }
     },
     "sortClassMethods": {
-      "description": "Sort class methods by visibility and type.",
+      "description": "Sort class methods: the constructor first, then static and instance methods by visibility and name.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class Counter",
+          "{",
+          "    private function reset(): void {}",
+          "",
+          "    public static function create(): self {}",
+          "",
+          "    public function increment(): void {}",
+          "}"
+        ]
+      }
     },
     "separateUseTypes": {
-      "description": "Insert blank line between different use statement types.",
+      "description": "Insert a blank line between `use`, `use function`, and `use const` statements.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "use App\\Models\\User;",
+          "use function App\\Helpers\\format;",
+          "use const App\\Config\\VERSION;"
+        ]
+      }
     },
     "expandUseGroups": {
-      "description": "Expand grouped use statements individually.",
+      "description": "Expand grouped `use` statements (ex. `use App\\{A, B};`) into one statement per name.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "use App\\Models\\{Post, User};"
+        ]
+      }
     },
     "nullTypeHint": {
       "description": "Format null type hints.",
@@ -335,234 +1028,627 @@
       "default": "question",
       "oneOf": [{
         "const": "question",
-        "description": "Use question mark syntax (?Type)."
+        "description": "Use question mark syntax (`?Type`)."
       }, {
         "const": "null-pipe",
-        "description": "Use null pipe syntax (Type|null)."
+        "description": "Use a union with `null` (ex. `null|Type`)."
       }, {
         "const": "null-pipe-last",
-        "description": "Place null last in pipe type hints."
-      }]
+        "description": "Use a union with `null` last (ex. `Type|null`)."
+      }],
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "function find(?int $id, string|null $name): ?User {}"
+        ]
+      }
     },
     "parenthesesAroundNewInMemberAccess": {
-      "description": "Add parentheses around new in member access.",
+      "description": "Add parentheses around `new` in member access (ex. `(new Foo())->bar()`). They're always added before PHP 8.4.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$date = new DateTime()->format('Y-m-d');"
+        ]
+      }
     },
     "parenthesesInNewExpression": {
-      "description": "Add parentheses to new expressions without arguments.",
+      "description": "Add parentheses to `new` expressions without arguments.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$user = new User;"
+        ]
+      }
     },
     "parenthesesInExitAndDie": {
-      "description": "Add parentheses to exit and die constructs.",
+      "description": "Add parentheses to `exit` and `die`.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "exit;"
+        ]
+      }
     },
     "parenthesesInAttribute": {
       "description": "Add parentheses to attributes without arguments.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "#[Deprecated]",
+          "function legacy(): void {}"
+        ]
+      }
     },
     "spaceBeforeArrowFunctionParameterListParenthesis": {
-      "description": "Add space before arrow function parameters.",
+      "description": "Add space before arrow function parameters (`fn ($x)`).",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$double = fn($x) => $x * 2;"
+        ]
+      }
     },
     "spaceBeforeClosureParameterListParenthesis": {
-      "description": "Add space before closure parameters.",
+      "description": "Add space before closure parameters (`function ($x)`).",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$double = function($x) {",
+          "    return $x * 2;",
+          "};"
+        ]
+      }
     },
     "spaceBeforeHookParameterListParenthesis": {
-      "description": "Add space before hook parameters.",
+      "description": "Add space before property hook parameters (`set ($value)`).",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class User",
+          "{",
+          "    public string $name {",
+          "        set(string $value) {",
+          "            $this->name = trim($value);",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
     },
     "inlineAbstractPropertyHooks": {
-      "description": "Inline abstract property hooks.",
+      "description": "Keep abstract property hooks on one line (`{ get; set; }`).",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "interface HasName",
+          "{",
+          "    public string $name { get; set; }",
+          "}"
+        ]
+      }
     },
     "spaceBeforeClosureUseClauseParenthesis": {
-      "description": "Add space before closure use parentheses.",
+      "description": "Add space before closure use parentheses (`use ($x)`).",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$greet = function () use($name) {",
+          "    return 'Hello ' . $name;",
+          "};"
+        ]
+      }
     },
     "spaceAfterCastUnaryPrefixOperators": {
-      "description": "Add space after cast operators like (int).",
+      "description": "Add space after cast operators like `(int)`.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$count = (int) $input;"
+        ]
+      }
     },
     "spaceAfterReferenceUnaryPrefixOperator": {
-      "description": "Add space after reference operator (&).",
+      "description": "Add space after the reference operator (`&`).",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$alias = &$original;"
+        ]
+      }
     },
     "spaceAfterErrorControlUnaryPrefixOperator": {
-      "description": "Add space after error control operator (@).",
+      "description": "Add space after the error control operator (`@`).",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$contents = @file_get_contents($path);"
+        ]
+      }
     },
     "spaceAfterLogicalNotUnaryPrefixOperator": {
-      "description": "Add space after logical not operator (!).",
+      "description": "Add space after the logical not operator (`!`).",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$isEmpty = !$items;"
+        ]
+      }
     },
     "spaceAfterBitwiseNotUnaryPrefixOperator": {
-      "description": "Add space after bitwise not operator (~).",
+      "description": "Add space after the bitwise not operator (`~`).",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$mask = ~$flags;"
+        ]
+      }
     },
     "spaceAfterIncrementUnaryPrefixOperator": {
-      "description": "Add space after prefix increment operator (++).",
+      "description": "Add space after the prefix increment operator (`++`).",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "++$count;"
+        ]
+      }
     },
     "spaceAfterDecrementUnaryPrefixOperator": {
-      "description": "Add space after prefix decrement operator (--).",
+      "description": "Add space after the prefix decrement operator (`--`).",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "--$count;"
+        ]
+      }
     },
     "spaceAfterAdditiveUnaryPrefixOperator": {
-      "description": "Add space after unary + and - operators.",
+      "description": "Add space after unary `+` and `-` operators.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$negative = -$value;"
+        ]
+      }
     },
     "spaceAroundConcatenationBinaryOperator": {
-      "description": "Add spaces around concatenation operator (.).",
+      "description": "Add spaces around the concatenation operator (`.`).",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$fullName = $firstName . ' ' . $lastName;"
+        ]
+      }
     },
     "spaceAroundAssignmentInDeclare": {
-      "description": "Add spaces around = in declare statements.",
+      "description": "Add spaces around `=` in `declare` statements.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "declare(strict_types=1);"
+        ]
+      }
     },
     "spaceWithinGroupingParenthesis": {
       "description": "Add spaces inside grouping parentheses.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$total = ($price + $tax) * $quantity;"
+        ]
+      }
     },
     "emptyLineAfterControlStructure": {
       "description": "Add empty line after control structures.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "if ($debug) {",
+          "    log('start');",
+          "}",
+          "run();"
+        ]
+      }
     },
     "openingTagOnOwnLine": {
-      "description": "Place the PHP opening tag on its own line.",
+      "description": "Place the `<?php` opening tag on its own line.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php echo 'Hello';"
+        ]
+      }
     },
     "emptyLineAfterOpeningTag": {
-      "description": "Add empty line after opening <?php tag.",
+      "description": "Add empty line after the `<?php` opening tag.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "echo 'Hello';"
+        ]
+      }
     },
     "emptyLineAfterDeclare": {
-      "description": "Add empty line after declare statement.",
+      "description": "Add empty line after `declare` statements.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "declare(strict_types=1);",
+          "namespace App;"
+        ]
+      }
     },
     "combineOpeningTagAndDeclare": {
-      "description": "Keep the opening tag and declare statement together.",
+      "description": "Put a `declare` statement that follows the `<?php` opening tag on the same line as it.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "declare(strict_types=1);",
+          "",
+          "echo 'Hello';"
+        ]
+      }
     },
     "emptyLineAfterNamespace": {
       "description": "Add empty line after namespace declaration.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "namespace App {",
+          "    function main(): void {}",
+          "}",
+          "namespace Tests {",
+          "    function test(): void {}",
+          "}"
+        ]
+      }
     },
     "emptyLineAfterUse": {
-      "description": "Add empty line after use statement blocks.",
+      "description": "Add empty line after `use` statement blocks.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "use App\\Models\\User;",
+          "$user = new User();"
+        ]
+      }
     },
     "emptyLineAfterSymbols": {
       "description": "Add empty line after top-level symbols.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "function greet(): void {}",
+          "greet();"
+        ]
+      }
     },
     "emptyLineBetweenSameSymbols": {
-      "description": "Add empty line between consecutive same-type symbols.",
+      "description": "Add empty line between consecutive same-type symbols. Only applies when `emptyLineAfterSymbols` is `true`.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "function first(): void {}",
+          "function second(): void {}"
+        ]
+      }
     },
     "emptyLineAfterClassLikeConstant": {
       "description": "Add empty line after class constant.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class Status",
+          "{",
+          "    const ACTIVE = 1;",
+          "    const INACTIVE = 0;",
+          "}"
+        ]
+      }
     },
     "emptyLineAfterClassLikeOpen": {
       "description": "Add an empty line after an opening class-like brace.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class User",
+          "{",
+          "    public string $name;",
+          "}"
+        ]
+      }
     },
     "emptyLineBeforeClassLikeClose": {
       "description": "Add an empty line before a closing class-like brace.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class User",
+          "{",
+          "    public string $name;",
+          "}"
+        ]
+      }
     },
     "emptyLineAfterEnumCase": {
       "description": "Add empty line after enum case.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "enum Suit",
+          "{",
+          "    case Hearts;",
+          "    case Spades;",
+          "}"
+        ]
+      }
     },
     "emptyLineAfterTraitUse": {
-      "description": "Add empty line after use statement in trait.",
+      "description": "Add empty line after trait `use` statements.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class User",
+          "{",
+          "    use HasName;",
+          "    use HasEmail;",
+          "}"
+        ]
+      }
     },
     "emptyLineAfterProperty": {
       "description": "Add empty line after property.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class User",
+          "{",
+          "    public string $name;",
+          "    public string $email;",
+          "}"
+        ]
+      }
     },
     "emptyLineAfterMethod": {
       "description": "Add empty line after method.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class User",
+          "{",
+          "    public function name(): string { return $this->name; }",
+          "    public function email(): string { return $this->email; }",
+          "}"
+        ]
+      }
     },
     "emptyLineBeforeReturn": {
       "description": "Add empty line before return statement.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "function total(array $items): int",
+          "{",
+          "    $sum = array_sum($items);",
+          "    return $sum;",
+          "}"
+        ]
+      }
     },
     "emptyLineBeforeDanglingComments": {
       "description": "Add empty line before dangling comments.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "function todo(): void",
+          "{",
+          "    run();",
+          "    // TODO: clean up",
+          "}"
+        ]
+      }
     },
     "separateClassLikeMembers": {
       "description": "Separate different kinds of class members with blank line.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class User",
+          "{",
+          "    const ROLE = 'user';",
+          "    public string $name;",
+          "    public function name(): string { return $this->name; }",
+          "}"
+        ]
+      }
     },
     "attributesOrder": {
       "description": "Sort attributes.",
       "default": "preserve",
-      "$ref": "#/definitions/sortOrder"
+      "$ref": "#/definitions/sortOrder",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "#[Route('/users')]",
+          "#[Api]",
+          "#[Middleware('auth')]",
+          "class UserController {}"
+        ]
+      }
     },
     "separateAttributes": {
-      "description": "Place attributes on separate lines.",
+      "description": "Split attribute groups (`#[A, B]`) into one attribute per line.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "#[Route('/users'), Middleware('auth')]",
+          "class UserController {}"
+        ]
+      }
     },
     "separateTraitUse": {
-      "description": "Separate trait use statements from adaptations.",
+      "description": "Split a `use` statement of multiple traits into one statement per trait.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "class User",
+          "{",
+          "    use HasName, HasEmail;",
+          "}"
+        ]
+      }
     },
     "indentHeredoc": {
       "description": "Indent heredoc and nowdoc content.",
       "default": true,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "function html(): string",
+          "{",
+          "    return <<<HTML",
+          "<p>Hello</p>",
+          "HTML;",
+          "}"
+        ]
+      }
     },
     "uppercaseLiteralKeyword": {
-      "description": "Use uppercase boolean and null literals.",
+      "description": "Print `true`, `false`, and `null` in uppercase.",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "x-example": {
+        "input": [
+          "<?php",
+          "",
+          "$enabled = true;",
+          "$value = null;"
+        ]
+      }
     }
   }
 }
