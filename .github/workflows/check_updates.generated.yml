@@ -26,6 +26,7 @@ jobs:
       - name: Run script
         env:
           OPENAI_API_KEY: '${{ secrets.OPENAI_API_KEY }}'
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
           CODEX_MODEL: gpt-6.1-sol
           REVIEW_MODEL: gpt-6-astra
         run: |-

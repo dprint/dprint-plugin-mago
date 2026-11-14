@@ -183,8 +183,8 @@ async function getLatestMagoVersions(): Promise<MagoVersions> {
 
 async function updateRustToolchain(magoVersion: string) {
   const content = await $.request(
-    `https://raw.githubusercontent.com/carthage-software/mago/${magoVersion}/Cargo.toml`,
-  ).text();
+    `https://api.github.com/repos/carthage-software/mago/contents/Cargo.toml?ref=${encodeURIComponent(magoVersion)}`,
+  ).header(getGitHubHeaders()).text();
   const match = content.match(/rust-version\s*=\s*"([^"]+)"/);
   if (match == null) {
     throw new Error("Could not find rust-version in mago's Cargo.toml.");
@@ -213,4 +213,14 @@ async function getLatestCrateVersion(crateName: string): Promise<string> {
   }
   $.logLight(`Latest ${crateName} version on crates.io:`, latestVersion);
   return latestVersion;
+}
+
+// Asks the GitHub API for raw file content. It authenticates when there's a
+// token, since unauthenticated requests get rate limited on the runners' shared IPs.
+function getGitHubHeaders(): Record<string, string> {
+  const token = Deno.env.get("GITHUB_TOKEN");
+  return {
+    accept: "application/vnd.github.raw+json",
+    ...(token ? { authorization: `Bearer ${token}` } : {}),
+  };
 }

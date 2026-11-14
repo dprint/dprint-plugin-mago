@@ -27,6 +27,8 @@ const buildJob = {
       name: "Run script",
       env: {
         OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}",
+        // for the requests the update script makes to GitHub
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}",
         // model that fixes/wires up the Mago update (Codex)
         CODEX_MODEL: "gpt-6.1-sol",
         // separate model that independently reviews the changes
