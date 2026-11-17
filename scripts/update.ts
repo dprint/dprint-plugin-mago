@@ -2,7 +2,7 @@
  * This script checks for any Mago updates and then automatically
  * publishes a new version of the plugin if so.
  */
-import { $, CargoToml, semver } from "automation";
+import { $, CargoToml, getLatestCrateVersion, semver } from "automation";
 import { aiFixMagoUpdate } from "./ai_fix.ts";
 
 const rootDirPath = $.path(import.meta.dirname!).parentOrThrow();
@@ -175,8 +175,8 @@ function getMagoCargoTomlVersions(text: string): MagoVersions {
 
 async function getLatestMagoVersions(): Promise<MagoVersions> {
   const [formatter, phpVersion] = await Promise.all([
-    getLatestCrateVersion("mago-formatter"),
-    getLatestCrateVersion("mago-php-version"),
+    getLatestVersion("mago-formatter"),
+    getLatestVersion("mago-php-version"),
   ]);
   return { formatter, phpVersion };
 }
@@ -204,15 +204,10 @@ async function updateRustToolchain(magoVersion: string) {
   }
 }
 
-async function getLatestCrateVersion(crateName: string): Promise<string> {
-  const data = await $.request(`https://crates.io/api/v1/crates/${crateName}`)
-    .json<{ crate?: { newest_version?: string } }>();
-  const latestVersion = data.crate?.newest_version;
-  if (latestVersion == null) {
-    throw new Error(`Could not find latest version of ${crateName} on crates.io.`);
-  }
-  $.logLight(`Latest ${crateName} version on crates.io:`, latestVersion);
-  return latestVersion;
+async function getLatestVersion(crateName: string): Promise<string> {
+  const { version } = await getLatestCrateVersion(crateName);
+  $.logLight(`Latest ${crateName} version on crates.io:`, version);
+  return version;
 }
 
 // Asks the GitHub API for raw file content. It authenticates when there's a
